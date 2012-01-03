@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="hello">Hello World, SchoolLifeActivity!</string>
+    <string name="app_name">SchoolLife</string>
+    <string name="menu1">个人</string>
+    <string name="menu2">分享</string>
+    <string name="menu3">管理</string>
+
+</resources>
