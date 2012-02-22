@@ -1,10 +1,17 @@
 package com.weifajue.schoolLife;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.Button;
 import android.view.*;
 import android.util.Log;
+import android.widget.*;
+
 
 /******SchoolLife应用主程序
  * 结构：包含3个页面:personalPage,sharingPage,managementPage
@@ -14,7 +21,16 @@ import android.util.Log;
  * 每个界面都包含"个人","分享“，”管理“三个按钮，用来跳转到其他的页面 
  */
 
-public class SchoolLifeActivity extends Activity {
+public class SchoolLifeActivity extends Activity{
+	
+	ListView mListView;
+ 
+	private static String[] classNum = new String[]
+	{ "第一节", "第二节", "第三节", "第四节", "第五节" };
+	                                                  	
+	private static String[] className = new String[]
+	{ "语文", "数学", "英语", "地理", "体育" };	
+
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -30,14 +46,25 @@ public class SchoolLifeActivity extends Activity {
 */
     public void personalPage()
     {
-    	
+    	LinearLayout mLinearLayout=new LinearLayout(this);
         setContentView(R.layout.main);
         
     	Button buttonPersonal1 =(Button)findViewById(R.id.buttonPersonal1);
         Button buttonSharing1 =(Button)findViewById(R.id.buttonSharing1);
         Button buttonManagement1 =(Button)findViewById(R.id.buttonManagement1);
-   
-
+        
+//        setContentView(R.layout.listviewitem);
+//        mListView=new ListView(this);
+       
+//        setContentView(R.layout.main);
+        mLinearLayout=(LinearLayout)findViewById(R.id.mainLinearLayout);
+        LinearLayout.LayoutParams param=new LinearLayout.LayoutParams(
+        		LinearLayout.LayoutParams.FILL_PARENT,
+        		LinearLayout.LayoutParams.WRAP_CONTENT);
+        
+        loadClassList();
+        mLinearLayout.addView(mListView,param);
+        
         Log.e("DebugLog","show personalPage View");
         
         //在个人页面中，去使能个人按钮
@@ -123,5 +150,32 @@ public class SchoolLifeActivity extends Activity {
         
         buttonManagement3.setEnabled(false);
     }
-/*****************************************管理页面处理方法 end ***********************************************/    
+/*****************************************管理页面处理方法 end ***********************************************/ 
+    
+    public void loadClassList()
+    {
+//    	mListView=(ListView)findViewById(R.id.list);
+    	mListView=new ListView(this);
+    	
+    	List<Map<String, Object>> appItems = new ArrayList<Map<String, Object>>();
+
+		for (int i = 0; i < classNum.length; i++)
+		{
+			Map<String, Object> appItem = new HashMap<String, Object>();
+			appItem.put("tvClassNum", classNum[i]);
+			appItem.put("tvClassName", className[i]);
+			appItem.put("ivMore", R.drawable.ic_input_add);
+			appItems.add(appItem);
+		}
+		
+		SimpleAdapter simpleAdapter = new SimpleAdapter(this, 
+				appItems,
+				R.layout.listviewitem, 
+				new String[]{"tvClassNum","tvClassName", "ivMore" },
+				new int[]{R.id.listViewTextView1, R.id.listViewTextView2, R.id.listViewImageView});
+
+//		setListAdapter(simpleAdapter);
+		mListView.setAdapter(simpleAdapter);
+	}
+
 }

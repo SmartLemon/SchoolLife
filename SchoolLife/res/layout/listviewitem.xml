@@ -1,0 +1,25 @@
+ <LinearLayout android:id="@+id/list"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" 
+        xmlns:android="http://schemas.android.com/apk/res/android">
+
+        <TextView
+            android:id="@+id/listViewTextView1"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/listViewTextView2"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="3" />
+
+        <ImageView
+            android:id="@+id/listViewImageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@android:drawable/ic_input_add" />
+
+    </LinearLayout>
