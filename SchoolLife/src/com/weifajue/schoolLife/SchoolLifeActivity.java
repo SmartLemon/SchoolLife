@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.view.*;
@@ -61,9 +62,9 @@ public class SchoolLifeActivity extends Activity{
         LinearLayout.LayoutParams param=new LinearLayout.LayoutParams(
         		LinearLayout.LayoutParams.FILL_PARENT,
         		LinearLayout.LayoutParams.WRAP_CONTENT);
-        
         loadClassList();
         mLinearLayout.addView(mListView,param);
+//        mLinearLayout.addView(mListView);
         
         Log.e("DebugLog","show personalPage View");
         
@@ -75,7 +76,11 @@ public class SchoolLifeActivity extends Activity{
             public void onClick(View v) {
                 // Perform action on click
                 Log.e("DebugLog","on click buttonSharing1");
-            	sharingPage();
+//            	sharingPage();
+        		Intent intent = new Intent();
+        		intent.setClass(SchoolLifeActivity.this,editClass.class);
+        		startActivity(intent);
+        		SchoolLifeActivity.this.finish();
             }
         });
         
@@ -164,16 +169,15 @@ public class SchoolLifeActivity extends Activity{
 			Map<String, Object> appItem = new HashMap<String, Object>();
 			appItem.put("tvClassNum", classNum[i]);
 			appItem.put("tvClassName", className[i]);
-			appItem.put("ivMore", R.drawable.ic_input_add);
+//			appItem.put("ivMore", R.drawable.ic_input_add);
 			appItems.add(appItem);
 		}
 		
 		SimpleAdapter simpleAdapter = new SimpleAdapter(this, 
 				appItems,
 				R.layout.listviewitem, 
-				new String[]{"tvClassNum","tvClassName", "ivMore" },
-				new int[]{R.id.listViewTextView1, R.id.listViewTextView2, R.id.listViewImageView});
-
+				new String[]{"tvClassNum","tvClassName"},
+				new int[]{R.id.listViewTextView1, R.id.listViewTextView2});
 //		setListAdapter(simpleAdapter);
 		mListView.setAdapter(simpleAdapter);
 	}
