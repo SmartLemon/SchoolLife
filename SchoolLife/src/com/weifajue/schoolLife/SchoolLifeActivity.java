@@ -7,6 +7,7 @@ import java.util.Map;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.widget.Button;
 import android.view.*;
@@ -26,6 +27,9 @@ public class SchoolLifeActivity extends Activity{
 	
 	ListView mListView;
  
+	private Cursor classListCursor;
+	private ClassDB classDBforList=new ClassDB(SchoolLifeActivity.this);
+	
 	private static String[] classNum = new String[]
 	{ "第一节", "第二节", "第三节", "第四节", "第五节" };
 	                                                  	
@@ -159,12 +163,41 @@ public class SchoolLifeActivity extends Activity{
     
     public void loadClassList()
     {
+//    	ClassDB cDB=new ClassDB();
+//    	Cursor cursor=new Cursor();
+    	
+    	
 //    	mListView=(ListView)findViewById(R.id.list);
+    	Log.d("DatabaseDebug", "in loadClassList");
     	mListView=new ListView(this);
     	
     	List<Map<String, Object>> appItems = new ArrayList<Map<String, Object>>();
-
-		for (int i = 0; i < classNum.length; i++)
+    	
+    	classListCursor=classDBforList.getClassCursor();
+    	
+    	String strTemp="nothing";
+    	for(int CN=0;CN<5;CN++)
+    	{
+    		Map<String, Object> appItem = new HashMap<String, Object>();
+    		
+    		appItem.put("tvClassNum", classNum[CN]);
+    		
+    		
+    		Class classTemp;
+    		classTemp=classDBforList.readClass(CN+1, 1);
+    		if(classTemp!=null)
+    		{
+    			strTemp=classTemp.getClassName();
+    		}
+    		else
+    		{
+    			strTemp="nothing";
+    		}
+			appItem.put("tvClassName", strTemp);
+			appItems.add(appItem);
+    	}
+    	Log.d("Database debug","loadClassList complete!");
+/*		for (int i = 0; i < classNum.length; i++)
 		{
 			Map<String, Object> appItem = new HashMap<String, Object>();
 			appItem.put("tvClassNum", classNum[i]);
@@ -172,7 +205,7 @@ public class SchoolLifeActivity extends Activity{
 //			appItem.put("ivMore", R.drawable.ic_input_add);
 			appItems.add(appItem);
 		}
-		
+*/		
 		SimpleAdapter simpleAdapter = new SimpleAdapter(this, 
 				appItems,
 				R.layout.listviewitem, 

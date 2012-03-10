@@ -15,10 +15,11 @@ public class editClass extends Activity
 
 	private Spinner spWeekDay,spClassNum;
 	private ArrayAdapter<String> adapterWD,adapterCN;
-	private Button bOK,bCancel;
+	private Button bOK,bCancel,bAdd,bDelete;
 	private EditText etClassName,etClassLocation,etTeacherName,etContinuumClass;
 	
-	public String m_WeekDay,m_ClassNum;
+//	public String m_WeekDay,m_ClassNum;
+	public int m_WeekDay=0,m_ClassNum=0;
 	public String m_ClassName,m_ClassLocation,m_TeacherName,m_ContinuumClass;
 	
     public void onCreate(Bundle savedInstanceState) {
@@ -36,6 +37,8 @@ public class editClass extends Activity
         spClassNum=(Spinner)findViewById(R.id.spinnerClassNum);
         bOK=(Button)findViewById(R.id.buttonEditOK);
         bCancel=(Button)findViewById(R.id.buttonEditCancel);
+        bAdd=(Button)findViewById(R.id.buttonAddClass);
+        bDelete=(Button)findViewById(R.id.buttonDeleteClass);
         etClassName=(EditText)findViewById(R.id.editTextClassName);
         etClassLocation=(EditText)findViewById(R.id.editTextClassLocation);
         etTeacherName=(EditText)findViewById(R.id.editTextTeacherName);
@@ -57,12 +60,14 @@ public class editClass extends Activity
         	public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3)
         	{
         		arg0.setVisibility(View.VISIBLE);
-        		m_WeekDay=pWeekDay[arg2];
+//        		m_WeekDay=pWeekDay[arg2];
+        		m_WeekDay=arg2+1;
         	}
         	@Override
         	public void onNothingSelected(AdapterView<?>arg0)
         	{
-        		m_WeekDay=pWeekDay[0];
+//        		m_WeekDay=pWeekDay[0];
+        		m_WeekDay=0;
         	}
         });
         
@@ -72,12 +77,14 @@ public class editClass extends Activity
         	public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3)
         	{
         		arg0.setVisibility(View.VISIBLE);
-        		m_ClassNum=pClassNum[arg2];
+//        		m_ClassNum=pClassNum[arg2];
+        		m_ClassNum=arg2+1;
         	}
         	@Override
         	public void onNothingSelected(AdapterView<?>arg0)
         	{
-        		m_ClassNum=pClassNum[0];
+//        		m_ClassNum=pClassNum[0];
+        		m_ClassNum=0;
         	}
         });
         etClassName.setHint("请输入课程名称");
@@ -129,7 +136,36 @@ public class editClass extends Activity
         		etContinuumClass.setText(m_ContinuumClass);    
         		return false;
         	}
-        }); */       
+        }); */ 
+        
+        bAdd.setOnClickListener(new Button.OnClickListener()
+        {
+        	@Override
+        	public void onClick(View v)
+        	{
+        		ClassDB cDB=new ClassDB(editClass.this);
+//        		int CN=Integer.parseInt(m_ClassNum);
+//        		int WD=Integer.parseInt(m_WeekDay);
+        		m_ClassName=etClassName.getText().toString();
+        		m_ClassLocation=etClassLocation.getText().toString();
+        		m_TeacherName=etTeacherName.getText().toString();
+        		m_ContinuumClass=etContinuumClass.getText().toString();
+        		int CC=Integer.parseInt(m_ContinuumClass);
+        		Class C=new Class(m_ClassNum,m_WeekDay,m_ClassName,m_TeacherName,CC);
+        		cDB.writeClass(C);
+        	}
+        });
+        bDelete.setOnClickListener(new Button.OnClickListener()
+        {
+        	@Override
+        	public void onClick(View v)
+        	{
+        		ClassDB cDB=new ClassDB(editClass.this);
+//        		int CN=Integer.parseInt(m_ClassNum);
+//        		int WD=Integer.parseInt(m_WeekDay);
+        		cDB.deleteClass(m_ClassNum, m_WeekDay);
+        	}
+        });
         //设置两个按键的内容,暂时均为退出到主类中
         bOK.setOnClickListener(new Button.OnClickListener()
         {
