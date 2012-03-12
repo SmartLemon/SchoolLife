@@ -136,13 +136,19 @@
                     android:id="@+id/textView7"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center"
                     android:text="连续节数：" />
 
-                <EditText
-                    android:id="@+id/editTextContinuumClass"
+                <Spinner
+                    android:id="@+id/spinnerContinuumClass"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <Button
+                    android:id="@+id/buttonSetClassTime"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1" />
+                    android:text="设置时间" />
 
             </LinearLayout>
 

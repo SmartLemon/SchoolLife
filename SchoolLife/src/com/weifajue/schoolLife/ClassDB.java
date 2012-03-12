@@ -22,7 +22,7 @@ public class ClassDB extends SQLiteOpenHelper {
 	/*表名称*/	
 	private final static String TABLE_NAME ="ClassTable";
 	
-	private final static int VERSION=1;
+	private final static int VERSION=2;
 	/*字段名称*/
 	//classId根据使用ClassNum*7+WeekDay来计算，只保存classId;
 	private final static String ID="_id";
@@ -30,6 +30,7 @@ public class ClassDB extends SQLiteOpenHelper {
 	private final static String CLASSNAME="className";
 	private final static String TEACHERNAME="teacherName";
 	private final static String CONTINUUMCLASS="continuumClass";
+	private final static String CLASSTIME="classTime";
 	
 	//创建表
 	private final static String CREATE_TABLE =
@@ -40,7 +41,8 @@ public class ClassDB extends SQLiteOpenHelper {
 		+CLASSID+" INTERGER,"
 		+CLASSNAME+" TEXT,"
 		+TEACHERNAME+" TEXT,"
-		+CONTINUUMCLASS+" INTERGER)";
+		+CONTINUUMCLASS+" INTERGER,"
+		+CLASSTIME+" INTERGER)";
 	
 	public ClassDB(Context context)
 	{
@@ -58,7 +60,9 @@ public class ClassDB extends SQLiteOpenHelper {
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		// TODO Auto-generated method stub
-		
+		String drop="DROP TABLE IF EXISTS "+TABLE_NAME;
+		db.execSQL(drop);
+		onCreate(db);
 	}
 /*	private static enum CLASS_TABLE_COLUMM
 	{
@@ -98,7 +102,7 @@ public class ClassDB extends SQLiteOpenHelper {
 					Log.e("Database debug"," the cid is "+String.valueOf(cursor.getInt(columnIndex)));
 					if(cursor.getInt(columnIndex)==cid)
 					{
-						C=new Class(cursor.getInt(1)/7,cursor.getInt(1)%7,cursor.getString(2),cursor.getString(3),cursor.getInt(4));
+						C=new Class(cursor.getInt(1)/7,cursor.getInt(1)%7,cursor.getString(2),cursor.getString(3),cursor.getInt(4),cursor.getInt(5)/100,cursor.getInt(5)%100);
 						break;//找到后跳出循环
 					}
 				}while(cursor.moveToNext());
@@ -129,12 +133,14 @@ public class ClassDB extends SQLiteOpenHelper {
 */		SQLiteDatabase pClassDB=this.getWritableDatabase();
 		Cursor cursor = null;
 		int cid=C.getClassNum()*7+C.getWeekDay();
+		int ct=C.getClassTime();
 		//使用contentValues的方法来插入和更新数据库
 		ContentValues cv=new ContentValues();
 		cv.put(CLASSID, cid);
 		cv.put(CLASSNAME, C.getClassName());
 		cv.put(TEACHERNAME, C.getTeacherName());
 		cv.put(CONTINUUMCLASS, C.getContinuumClass());
+		cv.put(CLASSTIME, ct);
 		
 		Log.d("Database debug", "writing Class"+String.valueOf(cid));
 		try

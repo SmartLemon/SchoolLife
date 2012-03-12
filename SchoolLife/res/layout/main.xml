@@ -3,8 +3,7 @@
 android:layout_width="fill_parent"
 android:layout_height="fill_parent"
 android:orientation="vertical"
-xmlns:android="http://schemas.android.com/apk/res/android"
->
+xmlns:android="http://schemas.android.com/apk/res/android">
 
 <LinearLayout
     android:id="@+id/mainLinearLayout"
@@ -12,17 +11,87 @@ xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="wrap_content"
     android:layout_weight="1"
     android:orientation="vertical" >
+
+<TabHost
+    android:id="@+id/maintabhost"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
 
-<TextView
-android:layout_width="wrap_content"
-android:layout_height="wrap_content"
-android:text="&#20010;&#20154;&#30028;&#38754;"
-android:gravity="center"
-android:layout_gravity="center_horizontal"
->
-</TextView>
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <TabWidget
+            android:id="@android:id/tabs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+        </TabWidget>
+
+        <FrameLayout
+            android:id="@android:id/tabcontent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <LinearLayout
+                android:id="@+id/tab1"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical" android:tag="一">
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tab2"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical" >
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tab3"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical" >
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tab4"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical" >
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tab5"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical" >
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tab6"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical" >
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tab7"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical" >
+            </LinearLayout>
+
+        </FrameLayout>
+    </LinearLayout>
+</TabHost>
    
 </LinearLayout>
+
 <LinearLayout
 android:layout_width="fill_parent"
 android:layout_height="wrap_content"

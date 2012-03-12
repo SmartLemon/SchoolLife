@@ -14,7 +14,8 @@ public class Class {
 	private String mClassName;
 	private String mTeacherName;
 	private int mContinuumClass;
-	
+	private int mTimeHour;
+	private int mTimeMinute;
 	public Class(int CN,int WD,String CNa,String TN, int CC)
 	{
 		mWeekDay=WD;
@@ -22,6 +23,18 @@ public class Class {
 		mClassName=CNa;
 		mTeacherName=TN;
 		mContinuumClass=CC;
+		mTimeHour=9;
+		mTimeMinute=0;
+	}
+	public Class(int CN,int WD,String CNa,String TN, int CC,int TH,int TM)
+	{
+		mWeekDay=WD;
+		mClassNum=CN;
+		mClassName=CNa;
+		mTeacherName=TN;
+		mContinuumClass=CC;
+		mTimeHour=TH;
+		mTimeMinute=TM;
 	}
 	
 	public void setWeekDay(int WD)
@@ -52,6 +65,12 @@ public class Class {
 		 mTeacherName=TN;
 	}
 	
+	public void setClassTime(int TH,int TM)
+	{
+		mTimeHour=TH;
+		mTimeMinute=TM;
+	}
+
 	public void setContinuumClass(int CC)
 	{
 		if(CC<0)CC=0;
@@ -81,5 +100,10 @@ public class Class {
 	public int getContinuumClass()
 	{
 		return mContinuumClass;
+	}
+	
+	public int getClassTime()
+	{
+		return mTimeHour*100+mTimeMinute;
 	}
 }
