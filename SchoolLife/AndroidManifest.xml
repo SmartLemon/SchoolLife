@@ -18,9 +18,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name="editClass">            
-        </activity>
+        <activity	android:name=".editClass"/>
+		<activity	android:name=".viewClass"/>   
+		<activity	android:name=".sharingActivity"/> 
+		                  
     </application>
 
 </manifest>

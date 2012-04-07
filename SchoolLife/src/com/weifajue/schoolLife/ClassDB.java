@@ -78,7 +78,7 @@ public class ClassDB extends SQLiteOpenHelper {
 	public Class readClass(int CN,int WD)
 	{
 		SQLiteDatabase pClassDB=null;
-		Cursor cursor = null;
+		Cursor cursor1=null;
 		Class C= null;//此处暂未做保护，需要上层调用函数进行判断该返回值是否为空;
 		int cid=CN*7+WD;
 		Log.d("Database debug", "reading Class"+String.valueOf(cid));
@@ -88,24 +88,24 @@ public class ClassDB extends SQLiteOpenHelper {
 			cidString[0]=String.valueOf(cid);
 //			pClassDB=SQLiteDatabase.openDatabase(DATABASE_NAME, null, SQLiteDatabase.OPEN_READWRITE|SQLiteDatabase.CREATE_IF_NECESSARY);
 			pClassDB=this.getReadableDatabase();
-//			cursor=pClassDB.query(TABLE_NAME, null, CLASSID+"=?", cidString, null, null, CLASSID);
-			cursor=pClassDB.query(TABLE_NAME, null, null, null, null, null, CLASSID);
-			if(cursor.getCount()!=0)
+			cursor1=pClassDB.query(TABLE_NAME, null, CLASSID+"=?", cidString, null, null, CLASSID);
+//			cursor2=pClassDB.query(TABLE_NAME, null, null, null, null, null, CLASSID);
+			if(cursor1.getCount()!=0)
 			{
-				cursor.moveToFirst();
+				cursor1.moveToFirst();
 				int columnIndex;
 				do//cursor初始应该是指向队头，所以要先do
 				{
-					columnIndex=cursor.getColumnIndex(CLASSID);
+					columnIndex=cursor1.getColumnIndex(CLASSID);
 					Log.e("Database debug"," the ColumnIndex is "+String.valueOf(columnIndex));
-					Log.e("Database debug"," the Column 2 is "+cursor.getString(2));
-					Log.e("Database debug"," the cid is "+String.valueOf(cursor.getInt(columnIndex)));
-					if(cursor.getInt(columnIndex)==cid)
+					Log.e("Database debug"," the Column 2 is "+cursor1.getString(2));
+					Log.e("Database debug"," the cid is "+String.valueOf(cursor1.getInt(columnIndex)));
+					if(cursor1.getInt(columnIndex)==cid)
 					{
-						C=new Class(cursor.getInt(1)/7,cursor.getInt(1)%7,cursor.getString(2),cursor.getString(3),cursor.getInt(4),cursor.getInt(5)/100,cursor.getInt(5)%100);
+						C=new Class(cursor1.getInt(1)/7,cursor1.getInt(1)%7,cursor1.getString(2),cursor1.getString(3),cursor1.getInt(4),cursor1.getInt(5)/100,cursor1.getInt(5)%100);
 						break;//找到后跳出循环
 					}
-				}while(cursor.moveToNext());
+				}while(cursor1.moveToNext());
 			}
 		}catch(Exception e)
 		{
@@ -113,7 +113,7 @@ public class ClassDB extends SQLiteOpenHelper {
 		}
 		finally
 		{
-			if(cursor!=null)cursor.close();
+			if(cursor1!=null)cursor1.close();
 			pClassDB.close();
 		}
 		return C;

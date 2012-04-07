@@ -26,7 +26,7 @@ xmlns:android="http://schemas.android.com/apk/res/android">
         <TabWidget
             android:id="@android:id/tabs"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content">
         </TabWidget>
 
         <FrameLayout
@@ -96,29 +96,5 @@ xmlns:android="http://schemas.android.com/apk/res/android">
 android:layout_width="fill_parent"
 android:layout_height="wrap_content"
 >
-<Button
-android:id="@+id/buttonPersonal1"
-android:layout_width="wrap_content"
-android:layout_height="wrap_content"
-android:text="@string/menu1"
-android:layout_weight="1"
->
-</Button>
-<Button
-android:id="@+id/buttonSharing1"
-android:layout_width="wrap_content"
-android:layout_height="wrap_content"
-android:text="@string/menu2"
-android:layout_weight="1"
->
-</Button>
-<Button
-android:id="@+id/buttonManagement1"
-android:layout_width="wrap_content"
-android:layout_height="wrap_content"
-android:text="@string/menu3"
-android:layout_weight="1"
->
-</Button>
 </LinearLayout>
 </LinearLayout>

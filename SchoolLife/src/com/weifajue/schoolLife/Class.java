@@ -52,7 +52,7 @@ public class Class {
 		{
 			CN=0;
 		}
-		mWeekDay=CN;
+		mClassNum=CN;
 	}
 	
 	public void setClassName(String CN)

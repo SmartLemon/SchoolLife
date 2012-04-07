@@ -150,6 +150,13 @@
                     android:layout_height="wrap_content"
                     android:text="设置时间" />
 
+                <Button
+                    android:id="@+id/buttonEditCancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="多搞几个" />
+
             </LinearLayout>
 
         </LinearLayout>
@@ -167,7 +174,7 @@
                 android:text=" 添加" />
 
             <Button
-                android:id="@+id/buttonDeleteClass"
+                android:id="@+id/buttonMultiOperate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -181,20 +188,14 @@
             android:layout_height="wrap_content"
             android:gravity="bottom" >
 
-            <Button
-                android:id="@+id/buttonEditOK"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/OK" />
+        </LinearLayout>
 
-            <Button
-                android:id="@+id/buttonEditCancel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/Cancel" />
-
+        <LinearLayout
+            android:id="@+id/linearLayout11"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical" >
         </LinearLayout>
 
     </LinearLayout>
