@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/rlSharingView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+
+        <LinearLayout
+            android:id="@+id/llSharingView"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_below="@+id/main_header"
+            android:orientation="vertical"
+            android:paddingBottom="60.0dip"
+			android:background="@color/gradient_end" 
+			android:paddingLeft="10dip" 
+			android:paddingRight="10dip" 
+			android:paddingTop="45dip">
+            <ListView
+                android:id="@+id/managingList"
+	            android:layout_width="fill_parent"
+	            android:layout_height="fill_parent"
+                android:background="@drawable/manageview_background_sharp" 
+                android:divider="@drawable/list_divider">
+            </ListView>
+        </LinearLayout>
+
+	<include 
+		android:id="@+id/sharingViewHeader" 
+		layout="@layout/top_header" 
+		android:layout_width="fill_parent" 
+		android:layout_height="wrap_content" />
+    </RelativeLayout>

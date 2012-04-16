@@ -1,16 +1,21 @@
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/editClassList"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:orientation="vertical">
+        android:orientation="vertical" 
+        android:background="@color/gray_background" 
+>
 
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/linearLayout2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical" >
+            android:paddingTop="45dip"
+            android:orientation="vertical"
+            android:paddingLeft="10dip" 
+	        android:paddingRight="10dip" 
+	        android:paddingBottom="5dip" >
 
             <LinearLayout
                 android:id="@+id/linearLayout4"
@@ -21,47 +26,51 @@
                     android:id="@+id/linearLayout5"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1" android:gravity="center">
+                    android:layout_marginRight="2dip"
+                    android:layout_weight="1" android:gravity="center" android:background="@drawable/editclass_item_bkg">
 
                     <TextView
                         android:id="@+id/textView1"
                         android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
                         android:text="@string/weekday"
-                        android:textSize="40px" android:gravity="center"/>
+                        android:textSize="25dip" />
 
                     <Spinner
                         android:id="@+id/spinnerWeekDay"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/button_bkg_normal" />
 
                 </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/linearLayout6"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1" android:gravity="center">
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                	android:layout_marginLeft="2dip"                    
+                    android:gravity="center" android:background="@drawable/editclass_item_bkg">
 
                     <TextView
                         android:id="@+id/textView2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="第"
-                        android:textSize="40px" />
+                        android:textSize="25dip" />
 
                     <Spinner
                         android:id="@+id/spinnerClassNum"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content" android:background="@drawable/button_bkg_normal"/>
 
                     <TextView
                         android:id="@+id/textView3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:text="节"
-                        android:textSize="40px" />
+                        android:textSize="25dip" />
 
                 </LinearLayout>
 
@@ -70,19 +79,20 @@
             <LinearLayout
                 android:id="@+id/linearLayout7"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center">
+                android:layout_height="wrap_content" android:layout_weight="1" 
+                android:gravity="center" 
+                android:background="@drawable/editclass_item_bkg" android:paddingLeft="10dip" android:paddingRight="20dip" android:paddingBottom="5dip" android:paddingTop="5dip" android:layout_below="@id/linearLayout4" android:layout_marginTop="4dip">
 
                 <TextView
                     android:id="@+id/textView4"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="课程名程：" />
+                    android:text="课程名程：" android:textSize="20dip"/>
 
                 <EditText
                     android:id="@+id/editTextClassName"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1">
+                    android:layout_height="wrap_content" android:layout_weight="1">
 
                     <requestFocus />
                 </EditText>
@@ -92,13 +102,14 @@
             <LinearLayout
                 android:id="@+id/linearLayout8"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center">
+                android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center"
+                android:background="@drawable/editclass_item_bkg" android:paddingLeft="10dip" android:paddingRight="20dip" android:paddingBottom="5dip" android:paddingTop="5dip" android:layout_below="@id/linearLayout7" android:layout_marginTop="4dip">
 
                 <TextView
                     android:id="@+id/textView5"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="上课地点：" />
+                    android:text="上课地点：" android:textSize="20dip"/>
 
                 <EditText
                     android:id="@+id/editTextClassLocation"
@@ -111,13 +122,14 @@
             <LinearLayout
                 android:id="@+id/linearLayout9"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center">
+                android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center"
+                android:background="@drawable/editclass_item_bkg" android:paddingLeft="10dip" android:paddingRight="20dip" android:paddingBottom="5dip" android:paddingTop="5dip" android:layout_below="@id/linearLayout8" android:layout_marginTop="4dip">
 
                 <TextView
                     android:id="@+id/textView6"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="任课老师：" />
+                    android:text="任课老师：" android:textSize="20dip"/>
 
                 <EditText
                     android:id="@+id/editTextTeacherName"
@@ -130,72 +142,60 @@
             <LinearLayout
                 android:id="@+id/linearLayout10"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center">
-
-                <TextView
-                    android:id="@+id/textView7"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="连续节数：" />
-
-                <Spinner
-                    android:id="@+id/spinnerContinuumClass"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/editclass_item_bkg"
+                android:gravity="center"
+                android:paddingBottom="5dip"
+                android:paddingLeft="10dip"
+                android:paddingRight="20dip"
+                android:paddingTop="5dip" android:layout_below="@id/linearLayout9" android:layout_marginTop="4dip" android:layout_marginBottom="10dip">
 
                 <Button
                     android:id="@+id/buttonSetClassTime"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="设置时间" />
+                    android:text="设置时间" android:background="@drawable/button_bkg_normal"/>
 
                 <Button
                     android:id="@+id/buttonEditCancel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="多搞几个" />
+                    android:text="多搞几个" android:background="@drawable/button_bkg_normal"/>
 
             </LinearLayout>
 
-        </LinearLayout>
+        </RelativeLayout>
 
         <LinearLayout
             android:id="@+id/linearLayout1"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/linearLayout2" 
+            android:layout_marginTop="4dip"
+            android:paddingLeft="10dip" 
+	        android:paddingRight="10dip" >
 
             <Button
                 android:id="@+id/buttonAddClass"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text=" 添加" />
+                android:layout_marginRight="2dip"
+                android:text=" 添加" android:background="@drawable/button_bkg_normal"/>
 
             <Button
                 android:id="@+id/buttonMultiOperate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="删除" />
-
+                android:layout_marginLeft="2dip"
+                android:text="删除" android:background="@drawable/button_bkg_normal"/>
         </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/linearLayout3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="bottom" >
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/linearLayout11"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical" >
-        </LinearLayout>
-
-    </LinearLayout>
+	<include 
+		android:id="@+id/editClassHeader" 
+		layout="@layout/top_header" 
+		android:layout_width="fill_parent" 
+		android:layout_height="wrap_content" />
+    </RelativeLayout>

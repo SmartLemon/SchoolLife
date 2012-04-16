@@ -24,7 +24,8 @@ public class editClass extends Activity
 	private static final int CLASSNUM=MAX_CLASSES_PER_DAY;
 
 	private String pClassNum[]=new String[CLASSNUM];
-
+	//界面标题
+	public View topHeader;
 	//控件变量定位
 	private Spinner spWeekDay,spClassNum,spContinuumClass ;
 	private ArrayAdapter<String> adapterWD,adapterCN,adapterCC;
@@ -86,6 +87,15 @@ public class editClass extends Activity
 	    	//初始化后置为false,表示不需要再初始化
 	    	classTableModifyFlag=false;
     	}
+		//设置顶端标题栏，把左右两个按键去显示（保留位置），更改标题
+		topHeader=(View)findViewById(R.id.editClassHeader);
+		//显示向左的箭头，用于返回
+//		Button btn=(Button)topHeader.findViewById(R.id.top_btn_left);
+//		btn.setVisibility(View.INVISIBLE);
+		Button btn=(Button)topHeader.findViewById(R.id.top_btn_right);
+		btn.setVisibility(View.INVISIBLE);
+		TextView top_textView=(TextView)topHeader.findViewById(R.id.tv_toptitle);
+		top_textView.setText("编辑课表");
     	//初始化控制资源
     	resourceInitialize();
     }
@@ -207,7 +217,7 @@ public class editClass extends Activity
 	    etClassName=(EditText)findViewById(R.id.editTextClassName);
 	    etClassLocation=(EditText)findViewById(R.id.editTextClassLocation);
 	    etTeacherName=(EditText)findViewById(R.id.editTextTeacherName);
-	    spContinuumClass = (Spinner)findViewById(R.id.spinnerContinuumClass);
+//	    spContinuumClass = (Spinner)findViewById(R.id.spinnerContinuumClass);
 	    
 	    adapterWD=new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,pWeekDay);
 	    adapterCN=new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,pClassNum);
@@ -219,7 +229,7 @@ public class editClass extends Activity
 	    
 	    spWeekDay.setAdapter(adapterWD);
 	    spClassNum.setAdapter(adapterCN);
-	    spContinuumClass.setAdapter(adapterCC);
+//	    spContinuumClass.setAdapter(adapterCC);
 	    
 	    //设置两个下拉框的内容
 	    spWeekDay.setOnItemSelectedListener(new Spinner.OnItemSelectedListener()
@@ -302,6 +312,7 @@ public class editClass extends Activity
 	    		m_ClassNum=1;
 	    	}
 	    });
+	    /*
 	    //设置连接上课节数下拉菜单
 	    spContinuumClass.setOnItemSelectedListener(new Spinner.OnItemSelectedListener()
 	    {
@@ -317,6 +328,7 @@ public class editClass extends Activity
 	    		m_ContinuumClass=0;
 	    	}
 	    });
+	    */
 	    etClassName.setHint("请输入课程名称");
 	    etClassLocation.setHint("请输入上课教室");
 	    etTeacherName.setHint("请输入老师名字");
@@ -442,7 +454,7 @@ public class editClass extends Activity
 		spWeekDay.setSelection(m_WeekDay-1);
 		isUpdateCNSpinner=false;
 		spClassNum.setSelection(m_ClassNum-1);
-		spContinuumClass.setSelection(m_ContinuumClass);
+//		spContinuumClass.setSelection(m_ContinuumClass);
 		if(m_ClassName!=null)
 		{
 			etClassName.setText(m_ClassName);

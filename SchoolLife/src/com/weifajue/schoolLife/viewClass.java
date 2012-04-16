@@ -10,11 +10,14 @@ import java.util.Map;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.drawable.*;
 //import android.database.Cursor;
 import android.os.Bundle;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TabHost;
+import android.widget.TextView;
 import android.widget.TabHost.OnTabChangeListener;
 import android.view.*;
 import android.util.Log;
@@ -85,36 +88,54 @@ public class viewClass extends Activity{
         loadClassList();
         mLinearLayout.addView(mListView,param);
 */
+        //listview控件初始化,必须在TabHost之前，因为tabhost会用到
+//    	mListView=new ListView(this);
+    	mListView=(ListView)findViewById(R.id.listViewClassList);
+    	    	
         //TabHost控件初始化
         mainTabHost=(TabHost)findViewById(R.id.maintabhost);
         mainTabHost.setup();
+		View view1 = View.inflate(viewClass.this, R.layout.class_tab_ind, null);
+		((ImageView) view1.findViewById(R.id.tab_imageview_icon)).setImageResource(R.drawable.sun_tab_selector);
         mainTabHost.addTab(mainTabHost.newTabSpec("日")   
-                .setIndicator("日")   
-                .setContent(R.id.tab1));   
-           
+                .setIndicator(view1)
+                .setContent(R.id.listViewClassList));   
+
+		View view2 = View.inflate(viewClass.this, R.layout.class_tab_ind, null);
+		((ImageView) view2.findViewById(R.id.tab_imageview_icon)).setImageResource(R.drawable.mon_tab_selector);
         mainTabHost.addTab(mainTabHost.newTabSpec("一")   
-                .setIndicator("一")   
-                .setContent(R.id.tab2));   
-           
+                .setIndicator(view2)   
+                .setContent(R.id.listViewClassList));
+        
+		View view3 = View.inflate(viewClass.this, R.layout.class_tab_ind, null);
+		((ImageView) view3.findViewById(R.id.tab_imageview_icon)).setImageResource(R.drawable.tue_tab_selector);        
         mainTabHost.addTab(mainTabHost.newTabSpec("二")   
-                .setIndicator("二")   
-                .setContent(R.id.tab3));
+                .setIndicator(view3)   
+                .setContent(R.id.listViewClassList));
         
+		View view4 = View.inflate(viewClass.this, R.layout.class_tab_ind, null);
+		((ImageView) view4.findViewById(R.id.tab_imageview_icon)).setImageResource(R.drawable.wed_tab_selector);        
         mainTabHost.addTab(mainTabHost.newTabSpec("三")   
-                .setIndicator("三")   
-                .setContent(R.id.tab4));   
+                .setIndicator(view4)   
+                .setContent(R.id.listViewClassList));   
            
+		View view5 = View.inflate(viewClass.this, R.layout.class_tab_ind, null);
+		((ImageView) view5.findViewById(R.id.tab_imageview_icon)).setImageResource(R.drawable.thu_tab_selector);        
         mainTabHost.addTab(mainTabHost.newTabSpec("四")   
-                .setIndicator("四")   
-                .setContent(R.id.tab5));   
+                .setIndicator(view5)   
+                .setContent(R.id.listViewClassList));   
            
+		View view6 = View.inflate(viewClass.this, R.layout.class_tab_ind, null);
+		((ImageView) view6.findViewById(R.id.tab_imageview_icon)).setImageResource(R.drawable.fri_tab_selector);        
         mainTabHost.addTab(mainTabHost.newTabSpec("五")   
-                .setIndicator("五")   
-                .setContent(R.id.tab6));
+                .setIndicator(view6)   
+                .setContent(R.id.listViewClassList));
         
+		View view7 = View.inflate(viewClass.this, R.layout.class_tab_ind, null);
+		((ImageView) view7.findViewById(R.id.tab_imageview_icon)).setImageResource(R.drawable.sat_tab_selector);        
         mainTabHost.addTab(mainTabHost.newTabSpec("六")   
-                .setIndicator("六")   
-                .setContent(R.id.tab7));
+                .setIndicator(view7)   
+                .setContent(R.id.listViewClassList));
        //为TabHost控件设置响应，分别加载当天的课程表到listView中
         mainTabHost.setOnTabChangedListener(new OnTabChangeListener()
         {
@@ -154,135 +175,42 @@ public class viewClass extends Activity{
         //默认开始显示周一的课程,会自动调用setOnTabChangedListener
         mainTabHost.setCurrentTab(1);
 
-        //尝试为listView中的textView设置响应函数，目前未成功
-        mListView.setOnItemClickListener(new OnItemClickListener()
+        //尝试为listView设置响应函数，目前未成功
+
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
         {
         	@Override
-        	public void onItemClick(AdapterView<?> arg0, View arg1,final int arg2, long arg3)
+        	public void onItemClick(AdapterView<?> arg0, View arg1,int arg2, long arg3)
         	{  
         	//View  The view within the AdapterView that was clicked (this will be a view provided by the adapter) 
         	//onItemClick方法的参数中,第二个参数就是子item的parent，直接用它找到子view 
-//        	    TextView textView= (TextView) arg1.findViewById(R.id.textViewClassTime); 
-        		TextView textView= (TextView)findViewById(R.id.textViewClassTime);
+    	        Toast.makeText(getApplicationContext(),
+          	          "aaa" , Toast.LENGTH_SHORT)
+          	          .show();
+/*
+    	        TextView textView= (TextView)findViewById(R.id.textViewClassTime);
         		//子view的点击事件
         	    textView.setOnClickListener(new View.OnClickListener() {
         	       @Override
         	       public void onClick(View arg0) {
-        	        Toast.makeText(getApplicationContext(),
-        	          "aaa" , Toast.LENGTH_SHORT)
-        	          .show();
+
         	       }
-        	      });
+        	      });*/
         	   }
         });
-
-//        FrameLayout tabFrame=(FrameLayout)findViewById(R.id.tab);
-        
-//        mLinearLayout.addView(tabFrame);
         
         Log.e("DebugLog","show personalPage View");
-/*        
-        //在个人页面中，去使能个人按钮
-        buttonPersonal1.setEnabled(false);
-        
-        //跳转到分享页面
-        buttonSharing1.setOnClickListener(new Button.OnClickListener() {
-            public void onClick(View v) {
-                // Perform action on click
-                Log.e("DebugLog","on click buttonSharing1");
-//            	sharingPage();
-        		Intent intent = new Intent();
-        		intent.setClass(viewClass.this,editClass.class);
-        		startActivity(intent);
-        		viewClass.this.finish();
-            }
-        });
-        
-      //跳转到管理页面
-        buttonManagement1.setOnClickListener(new Button.OnClickListener() {
-            public void onClick(View v) {
-                // Perform action on click
-                Log.e("DebugLog","on click buttonManagement1");
-            	managementPage();
-            }
-        });
-*/
     }
 /*****************************************个人页面处理方法 end********************************************/
-    
-/* ****************************************共享页面处理方法*********************************************
-    public void sharingPage()
-    {
-        setContentView(R.layout.menu2); 
-    	final Button buttonPersonal2=(Button)findViewById(R.id.buttonPersonal2);
-        final Button buttonSharing2=(Button)findViewById(R.id.buttonSharing2);
-        final Button buttonManagement2=(Button)findViewById(R.id.buttonManagement2);
-
-        Log.e("DebugLog","show sharingPage View");
-        
-        buttonPersonal2.setOnClickListener(new Button.OnClickListener() {
-            public void onClick(View v) {
-                // Perform action on click
-                Log.e("DebugLog","on click OnClickListener");
-            	personalPage();
-            }
-        });
-        
-        buttonSharing2.setEnabled(false);
-        
-        buttonManagement2.setOnClickListener(new Button.OnClickListener() {
-            public void onClick(View v) {
-                // Perform action on click
-                Log.e("DebugLog","on click buttonManagement2");
-            	managementPage();
-            }
-        });
-    }
-*****************************************共享页面处理方法end *********************************************/    
-
-/*****************************************管理页面处理方法***********************************************    
-    public void managementPage()
-    {
-        setContentView(R.layout.menu3); 
-        
-    	final Button buttonPersonal3=(Button)findViewById(R.id.buttonPersonal3);
-        final Button buttonSharing3=(Button)findViewById(R.id.buttonSharing3);
-        final Button buttonManagement3=(Button)findViewById(R.id.buttonManagement3);
-
-        Log.e("DebugLog","show managementPage View");
-                
-        buttonPersonal3.setOnClickListener(new Button.OnClickListener() {
-            public void onClick(View v) {
-                // Perform action on click
-                Log.e("DebugLog","on click buttonPersonal3");
-            	personalPage();
-            }
-        });
-        
-        buttonSharing3.setOnClickListener(new Button.OnClickListener() {
-            public void onClick(View v) {
-                // Perform action on click
-                Log.e("DebugLog","on click buttonSharing3");
-            	sharingPage();
-            }
-        });
-        
-        buttonManagement3.setEnabled(false);
-    }
-*****************************************管理页面处理方法 end ***********************************************/ 
-    
+ 
     //加载课程表内容到ListView中
     //传入参数WD表示要加载星期几的数据，1~7分别表示星期一至星期日
     public void loadClassList(int WD)
     {
     	ClassDB classDBforList=new ClassDB(viewClass.this);
     	Log.d("DatabaseDebug", "in loadClassList");
-    	mListView=new ListView(this);
-
     	List<Map<String, Object>> appItems = new ArrayList<Map<String, Object>>();
-    	
-//    	classDBforList.getClassCursor();
-    	
+    	    	
     	for(int CN=0;CN<MAX_CLASSES_PER_DAY;CN++)
     	{
     		Map<String, Object> appItem = new HashMap<String, Object>();
@@ -312,35 +240,13 @@ public class viewClass extends Activity{
 			appItems.add(appItem);
     	}
     	Log.d("Database debug","loadClassList complete!");
-/*		for (int i = 0; i < classNum.length; i++)
-		{
-			Map<String, Object> appItem = new HashMap<String, Object>();
-			appItem.put("tvClassNum", classNum[i]);
-			appItem.put("tvClassName", className[i]);
-//			appItem.put("ivMore", R.drawable.ic_input_add);
-			appItems.add(appItem);
-		}
-*/		
+	
 		SimpleAdapter simpleAdapter = new SimpleAdapter(this, 
 				appItems,
 				R.layout.listviewitem, 
 				classListContent,
 				classListContentID);
-//		setListAdapter(simpleAdapter);
+
 		mListView.setAdapter(simpleAdapter);
-		
-        LinearLayout ll=new LinearLayout(this);
-        switch(WD)
-        {
-        case 1:ll=(LinearLayout)findViewById(R.id.tab2);break;
-        case 2:ll=(LinearLayout)findViewById(R.id.tab3);break;
-        case 3:ll=(LinearLayout)findViewById(R.id.tab4);break;
-        case 4:ll=(LinearLayout)findViewById(R.id.tab5);break;
-        case 5:ll=(LinearLayout)findViewById(R.id.tab6);break;
-        case 6:ll=(LinearLayout)findViewById(R.id.tab7);break;
-        case 7:ll=(LinearLayout)findViewById(R.id.tab1);break;
-        }
-        ll.removeAllViews();
-        ll.addView(mListView);    
 	}
 }

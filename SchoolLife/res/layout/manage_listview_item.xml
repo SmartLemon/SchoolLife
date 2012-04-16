@@ -1,0 +1,11 @@
+        <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/tvManagingListItem"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:gravity="center"
+            android:text="TextView"
+            android:textColor="@color/title_tv_color"
+            android:textSize="25dip" >
+		</TextView>

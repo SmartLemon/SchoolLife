@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<color name="white">#FFFFFF</color>
+	<color name="black">#000000</color>
+	<color name="main_background">#ffffff</color><!--界面主色调-->
+	<color name="gray_background">#afafaf</color>
+	<color name="darker">#ffd580</color><!--比界面主色调深一些的配色-->
+	<color name="gradient_begin">#FFFFFF</color><!--渐变色的起始色（白色）-->
+	<color name="gradient_end">#afafaf</color><!--渐变色的结束色（天蓝色）-->
+	<color name="rev_gradient_begin">#afafaf</color><!--反渐变色的起始色（天蓝色），用于选中状态-->
+	<color name="rev_gradient_end">#FFFFFF</color><!--反渐变色的结束色（白色）-->	
+	<color name="title_tv_color">#afafaf</color><!-- 标题字体颜色（暗灰蓝色） -->
+</resources>
