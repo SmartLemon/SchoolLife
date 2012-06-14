@@ -29,7 +29,7 @@ public class managingActivity extends Activity {
 	public ListView managingList;
 	public View topHeader;
 	//主listview的标题内容
-	private final static String[]managingListContent={"编辑课表内容","设置课程参数","软件更新","关于"};
+	private final static String[]managingListContent={"编辑课表","管理课表","软件更新","关于"};
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -59,9 +59,8 @@ public class managingActivity extends Activity {
         		case 0:	intent=new Intent(managingActivity.this,editClass.class);
         				startActivity(intent);
         				break;
-        		case 1: 
-        				Toast.makeText(getApplicationContext(),
-            	         "设置课程参数" , Toast.LENGTH_SHORT).show();
+        		case 1: intent=new Intent(managingActivity.this,manageClassSheet.class);
+						startActivity(intent);
         				break;
         		case 2:
 	    				Toast.makeText(getApplicationContext(),

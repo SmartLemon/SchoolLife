@@ -5,9 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.weifajue.schoolLife.data.ClassDB;
+import com.weifajue.schoolLife.model.Class;
+
 import android.app.Activity;
 import android.app.TimePickerDialog;
-import android.content.Intent;
 import android.os.Bundle;
 
 import android.util.Log;
@@ -27,7 +29,7 @@ public class editClass extends Activity
 	//界面标题
 	public View topHeader;
 	//控件变量定位
-	private Spinner spWeekDay,spClassNum,spContinuumClass ;
+	private Spinner spWeekDay,spClassNum;
 	private ArrayAdapter<String> adapterWD,adapterCN,adapterCC;
 	private Button bMultiOperate,bAdd,bDelete;
 	private Button bSetClassTime;
@@ -95,7 +97,7 @@ public class editClass extends Activity
 		Button btn=(Button)topHeader.findViewById(R.id.top_btn_right);
 		btn.setVisibility(View.INVISIBLE);
 		TextView top_textView=(TextView)topHeader.findViewById(R.id.tv_toptitle);
-		top_textView.setText("编辑课表");
+		top_textView.setText("编辑课程");
     	//初始化控制资源
     	resourceInitialize();
     }
@@ -356,7 +358,8 @@ public class editClass extends Activity
 	    		m_ClassName=etClassName.getText().toString();
 	    		m_ClassLocation=etClassLocation.getText().toString();
 	    		m_TeacherName=etTeacherName.getText().toString();
-	    		Class C=new Class(m_ClassNum,m_WeekDay,m_ClassName,m_TeacherName,m_ContinuumClass,m_ClassTimeHour,m_ClassTimeMinute);
+//	    		Class C=new Class(m_ClassNum,m_WeekDay,m_ClassName,m_TeacherName,m_ContinuumClass,m_ClassTimeHour,m_ClassTimeMinute);
+	    		Class C=new Class();
 	    		//先将主编辑界面的课程信息写入数据库，之后再读取指示表中的内容
 	    		cDB.writeClass(C);
 	    		int WD=0,CN=0;

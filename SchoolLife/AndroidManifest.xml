@@ -21,7 +21,9 @@
         <activity	android:name=".editClass"/>
 		<activity	android:name=".viewClass"/>   
 		<activity	android:name=".sharingActivity"/> 
-		<activity	android:name=".managingActivity"/> 		                  
+		<activity	android:name=".managingActivity"/> 
+		<activity	android:name=".manageClassSheet"/> 
+		<activity	android:name=".editClassSheet"/> 				                  
     </application>
 
 </manifest>

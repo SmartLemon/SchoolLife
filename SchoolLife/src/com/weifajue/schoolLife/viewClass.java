@@ -4,20 +4,21 @@
 package com.weifajue.schoolLife;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.weifajue.schoolLife.Util.timeProcess;
+import com.weifajue.schoolLife.data.ClassDB;
+import com.weifajue.schoolLife.model.Class;
+import com.weifajue.schoolLife.model.ClassSheet;
+
 import android.app.Activity;
-import android.content.Intent;
-import android.graphics.drawable.*;
 //import android.database.Cursor;
 import android.os.Bundle;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TabHost;
-import android.widget.TextView;
 import android.widget.TabHost.OnTabChangeListener;
 import android.view.*;
 import android.util.Log;
@@ -30,7 +31,7 @@ import android.widget.*;
  */
 public class viewClass extends Activity{
 	
-	private static final int MAX_CLASSES_PER_DAY = 5;
+//	private static final int MAX_CLASSES_PER_DAY = 5;
 
 	ListView mListView;
 	
@@ -210,35 +211,41 @@ public class viewClass extends Activity{
     	ClassDB classDBforList=new ClassDB(viewClass.this);
     	Log.d("DatabaseDebug", "in loadClassList");
     	List<Map<String, Object>> appItems = new ArrayList<Map<String, Object>>();
-    	    	
-    	for(int CN=0;CN<MAX_CLASSES_PER_DAY;CN++)
-    	{
+		ClassSheet cCS=classDBforList.getCurrentClassSheet();
+		timeProcess tp=new timeProcess();
+		int WN=tp.weekOffset(cCS.getdateStart(), new Date());		
+		Class[] classTemp=classDBforList.readClassDayList(WN,WD); 
+		int classnumbers=classTemp.length;
+		int maxClass=cCS.getMaxClassNumPerDay();
+    	for(int CN=0;CN<maxClass;CN++)    		
+		{
     		Map<String, Object> appItem = new HashMap<String, Object>();
-  		
-    		Class classTemp;
-    		classTemp=classDBforList.readClass(CN+1, WD);
-    		//添加课程内容
-    		if(classTemp!=null)
-    		{
-    			String time;
-    			if((classTemp.getClassTime()%100)>9)time=String.valueOf(classTemp.getClassTime()%100);
-    			else time='0'+String.valueOf(classTemp.getClassTime()%100);
-    			appItem.put(classListContent[0], String.valueOf(classTemp.getClassTime()/100)+':'+time);    		
-    			appItem.put(classListContent[1], classNum[classTemp.getClassNum()-1]);    	    		
-    			appItem.put(classListContent[2], classTemp.getClassName());  
-    			appItem.put(classListContent[3], classTemp.getTeacherName());  
-    			appItem.put(classListContent[4], "上课教室");  
+    		int j=0;
+    		for(j=0;j<classnumbers;j++)
+	    	{
+	    		//添加课程内容
+    			//通过两次循环，按最大课程数找每一节课的内容
+	    		if(classTemp[j].getClassNum()==CN)
+	    		{
+	    			appItem.put(classListContent[0], String.valueOf(classTemp[j].getMinutesForClass()));    		
+	    			appItem.put(classListContent[1], classNum[classTemp[j].getClassNum()-1]);    	    		
+	    			appItem.put(classListContent[2], classTemp[j].getClassName());  
+	    			appItem.put(classListContent[3], classTemp[j].getTeacherName());  
+	    			appItem.put(classListContent[4], "上课教室"); 
+	    			break;
+	    		}
+	    	}
+    		//如果读到的课程表中没有对应该节课的内容，则按默认填写
+	    	if(j==classnumbers)
+	    	{
+	    		appItem.put(classListContent[0], "时间");    		
+	   			appItem.put(classListContent[1], "第"+(CN+1)+"节");    	    		
+	   			appItem.put(classListContent[2], "课程名程");  
+	   			appItem.put(classListContent[3], "老师");  
+	   			appItem.put(classListContent[4], "教室");  
     		}
-    		else
-    		{
-    			appItem.put(classListContent[0], "时间");    		
-    			appItem.put(classListContent[1], classNum[CN]);    	    		
-    			appItem.put(classListContent[2], "课程名程");  
-    			appItem.put(classListContent[3], "老师");  
-    			appItem.put(classListContent[4], "教室");  
-    		}
-			appItems.add(appItem);
-    	}
+	    	appItems.add(appItem);
+		}
     	Log.d("Database debug","loadClassList complete!");
 	
 		SimpleAdapter simpleAdapter = new SimpleAdapter(this, 
@@ -246,7 +253,6 @@ public class viewClass extends Activity{
 				R.layout.listviewitem, 
 				classListContent,
 				classListContentID);
-
 		mListView.setAdapter(simpleAdapter);
 	}
 }
