@@ -1,0 +1,8 @@
+*.classpath
+*.class
+*.DS_Store
+*.project
+*.settings
+SchoolLife/bin/
+SchoolLife/gen/
+SchoolLife/local.properties
