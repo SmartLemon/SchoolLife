@@ -12,7 +12,6 @@ import com.weifajue.schoolLife.data.LocalFile;
 import android.database.sqlite.SQLiteDatabase;
 //import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -104,11 +103,11 @@ public class ClassDB extends SQLiteOpenHelper {
 			  +"[RecordName] CHAR," 
 			  +"[VideoName] CHAR)";
 
-	private String currentClassSheetName;
-	private int currentClassSheetID;
-	private String currentClassDetailTableName;
-	private String currentHomeworkTableName;
-	private String currentNotesTableName;
+//	private String currentClassSheetName;
+//	private int currentClassSheetID;
+//	private String currentClassDetailTableName;
+//	private String currentHomeworkTableName;
+//	private String currentNotesTableName;
 /*	
 	//创建表
 	private final static String CREATE_TABLE =
@@ -126,30 +125,33 @@ public class ClassDB extends SQLiteOpenHelper {
 	{
 		super(context, DATABASE_NAME, null, VERSION);
 		// TODO Auto-generated constructor stub
-//		LocalFile loclfile=new LocalFile();
+//		LocalFile localfile=new LocalFile();
+//		loclfile.setCurrentClassSheetName("hello123");
 //		currentClassSheetName=loclfile.getCurrentClassSheetName();
-		currentClassSheetName="default";
-		setTableName();
+		Log.e(DEBUG_TAG, "Running in ClassDB()");
+//		currentClassSheetName="hello123";
+//		setTableName();
 	}
-
+	//onCreate函数只在数据库第一次被创建时调用，后面将不会再调用
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		// TODO Auto-generated method stub
+		Log.e(DEBUG_TAG, "Running in onCreate");
 		Log.d(DEBUG_TAG, "Creating Table");
 		db.execSQL(CREATE_CLASS_SHEET_TABLE_HEAD+CLASS_SHEET_NAME+CREATE_CLASS_SHEET_TABLE_TAIL);
 		String[] string=new String[1];
-		string[0]=currentClassSheetName;
+		string[0]="default";
 //		Cursor cursor1=db.query(CLASS_SHEET_NAME, null, "SheetName"+"=?", string, null, null, null);
  		Cursor cursor1=db.query(CLASS_SHEET_NAME, null, null, null, null, null, null);
  		if(cursor1.getCount()==0)//没有找到，表示是第一次创建
 		{	//在ClassSheet列表中新建一个列表
-			ClassSheet cs=new ClassSheet(currentClassSheetName);
+			ClassSheet cs=new ClassSheet("default");
 			writeClassSheet(db,cs);
 			//新插入一个后，再查一次，以获取新插入的ClassSheet的ID值
 //			cursor1=db.query(CLASS_SHEET_NAME, null, "SheetName"+"=?", string, null, null, null);
-			cursor1=db.query(CLASS_SHEET_NAME, null, null, null, null, null, null);
+//			cursor1=db.query(CLASS_SHEET_NAME, null, null, null, null, null, null);
 		}
- 		cursor1.moveToFirst();
+/* 		cursor1.moveToFirst();
 		int sheetIDColumnIndex=cursor1.getColumnIndex("SheetID");
 		//查到该课表在table里面ID值后，转换为String类型，用于生成其他table的名字
 		currentClassSheetID=cursor1.getInt(sheetIDColumnIndex);
@@ -167,7 +169,7 @@ public class ClassDB extends SQLiteOpenHelper {
 		currentNotesTableName="NT"+String.valueOf(currentClassSheetID);
 		Log.d(DEBUG_TAG, "Creating ClassDetailTable "+currentNotesTableName);
 		db.execSQL(CREATE_NOTES_TABLE_HEAD+currentNotesTableName+CREATE_NOTES_TABLE_TAIL);	
-	}                  
+*/	}                  
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -178,7 +180,7 @@ public class ClassDB extends SQLiteOpenHelper {
 	}
 	
 	//提供按天数、节读取功能，读取某天某节课
-	public Class readClass(int WN,int WD,int CN)
+	public Class readClass(String currentClassSheetName,int WN,int WD,int CN)
 	{
 		SQLiteDatabase pClassDB=null;
 		Cursor cursor=null;
@@ -194,14 +196,16 @@ public class ClassDB extends SQLiteOpenHelper {
 		try
 		{
 			pClassDB=this.getReadableDatabase();
-			cursor=pClassDB.query(currentClassDetailTableName, null, sel, selArgs, null, null, "ID");
+			String[] selArgsShhetName=new String[1];
+			selArgsShhetName[0]=currentClassSheetName;
+			cursor=pClassDB.query(CLASS_SHEET_NAME, null,"SheetName=?", selArgsShhetName, null, null, null);
+			cursor.moveToFirst();
+			int sheetIDColumnIndex=cursor.getColumnIndex("SheetID");
+			int classSheetID=cursor.getInt(sheetIDColumnIndex);
+			String tableName="CDT"+String.valueOf(classSheetID);
+			cursor=pClassDB.query(tableName, null, sel, selArgs, null, null, "ID");
 			if(cursor.getCount()!=0)
 			{
-//				cursor.moveToFirst();
-//				int columnIndex;
-//				do//cursor初始应该是指向队头，所以要先do
-//				{
-//					columnIndex=cursor.getColumnIndex(CLASSID);
 				cursor.moveToFirst();
 				Log.e(DEBUG_TAG,"reading class success:"+selArgs[0]+" "+selArgs[1]);
 				C=new Class(WN,WD,CN,cursor.getString(5),cursor.getString(6));
@@ -213,13 +217,6 @@ public class ClassDB extends SQLiteOpenHelper {
 				C.setNotesIndex(cursor.getInt(10));
 				C.setRate(cursor.getInt(11));
 				C.setComment(cursor.getString(12));
-				
-//					if(cursor.getInt(columnIndex)==cid)
-//					{
-//						C=new Class(cursor.getInt(1)/7,cursor.getInt(1)%7,cursor.getString(2),cursor.getString(3));
-//						break;//找到后跳出循环
-//					}
-//				}while(cursor.moveToNext());
 			}
 		}catch(Exception e)
 		{
@@ -233,13 +230,13 @@ public class ClassDB extends SQLiteOpenHelper {
 		return C;
 	}
 	
-	public Class readClass(int WD,int CN)
+	public Class readClass(String currentClassSheetName,int WD,int CN)
 	{
 		SQLiteDatabase pClassDB=null;
 		Cursor cursor=null;
 		timeProcess tp=new timeProcess();
 		Class C= null;//此处暂未做保护，需要上层调用函数进行判断该返回值是否为空;
-		int WN=getCurrentWeekNum();
+		int WN=tp.dateToDefaultWeekNum(new Date());
 		int daynum=tp.weekAndWeekDayToDayNum(WN, WD);
 		String sel="DayNum=? and ClassNum=?";
 		String[] selArgs=new String[2];
@@ -249,7 +246,14 @@ public class ClassDB extends SQLiteOpenHelper {
 		try
 		{
 			pClassDB=this.getReadableDatabase();
-			cursor=pClassDB.query(currentClassDetailTableName, null, sel, selArgs, null, null, "ID");
+			String[] selArgsShhetName=new String[1];
+			selArgsShhetName[0]=currentClassSheetName;
+			cursor=pClassDB.query(CLASS_SHEET_NAME, null,"SheetName=?", selArgsShhetName, null, null, null);
+			cursor.moveToFirst();
+			int sheetIDColumnIndex=cursor.getColumnIndex("SheetID");
+			int classSheetID=cursor.getInt(sheetIDColumnIndex);
+			String tableName="CDT"+String.valueOf(classSheetID);
+			cursor=pClassDB.query(tableName, null, sel, selArgs, null, null, "ID");
 			if(cursor.getCount()!=0)
 			{
 				cursor.moveToFirst();
@@ -276,7 +280,7 @@ public class ClassDB extends SQLiteOpenHelper {
 		return C;
 	}
 	
-	public Class[] readClassDayList(int WN,int WD)
+	public Class[] readClassDayList(String currentClassSheetName,int WN,int WD)
 	{
 		SQLiteDatabase pClassDB=null;
 		Cursor cursor=null;
@@ -286,11 +290,18 @@ public class ClassDB extends SQLiteOpenHelper {
 		timeProcess tp=new timeProcess();
 		int DN=tp.weekAndWeekDayToDayNum(WN, WD);
 		selArgs[0]=String.valueOf(DN);
-		Log.d(DEBUG_TAG, "reading Class Day List"+selArgs);
+		Log.d(DEBUG_TAG, "reading Class Day List"+selArgs[0]);
 		try
 		{
 			pClassDB=this.getReadableDatabase();
-			cursor=pClassDB.query(currentClassDetailTableName, null, sel, selArgs, null, null, "ClassNum");
+			String[] selArgsShhetName=new String[1];
+			selArgsShhetName[0]=currentClassSheetName;
+			cursor=pClassDB.query(CLASS_SHEET_NAME, null,"SheetName=?", selArgsShhetName, null, null, null);
+			cursor.moveToFirst();
+			int sheetIDColumnIndex=cursor.getColumnIndex("SheetID");
+			int classSheetID=cursor.getInt(sheetIDColumnIndex);
+			String tableName="CDT"+String.valueOf(classSheetID);
+			cursor=pClassDB.query(tableName, null, sel, selArgs, null, null, "ClassNum");
 			int count=cursor.getCount();
 			if(count>=0)
 			{
@@ -322,7 +333,7 @@ public class ClassDB extends SQLiteOpenHelper {
 		return classList;
 	}
 	//将课程内容写入到数据库中,返回true表示成功,返回false表示失败
-	public boolean writeClass(Class C)
+	public boolean writeClass(String currentClassSheetName,Class C)
 	{
 		SQLiteDatabase pClassDB=this.getWritableDatabase();
 		Cursor cursor = null;
@@ -351,17 +362,24 @@ public class ClassDB extends SQLiteOpenHelper {
 			String[] selArgs=new String[2];
 			selArgs[0]=String.valueOf(daynum);
 			selArgs[1]=String.valueOf(C.getClassNum());
-			cursor=pClassDB.query(currentClassDetailTableName, null, sel, selArgs, null, null, "ID");
+			String[] selArgsShhetName=new String[1];
+			selArgsShhetName[0]=currentClassSheetName;
+			cursor=pClassDB.query(CLASS_SHEET_NAME, null,"SheetName=?", selArgsShhetName, null, null, null);
+			cursor.moveToFirst();
+			int sheetIDColumnIndex=cursor.getColumnIndex("SheetID");
+			int classSheetID=cursor.getInt(sheetIDColumnIndex);
+			String tableName="CDT"+String.valueOf(classSheetID);			
+			cursor=pClassDB.query(currentClassSheetName, null, sel, selArgs, null, null, "ID");
 			//判断是更新还是新插入
 			if(cursor.getCount()!=0)
 			{
 				Log.d(DEBUG_TAG , "update Class in writing process");
-				pClassDB.update(currentClassDetailTableName, cv, sel, selArgs);
+				pClassDB.update(tableName, cv, sel, selArgs);
 			}
 			else
 			{
 				Log.d(DEBUG_TAG, "insert Class in writing process");
-				pClassDB.insert(currentClassDetailTableName, null, cv);
+				pClassDB.insert(tableName, null, cv);
 			}
 		}catch(Exception e)
 		{
@@ -382,7 +400,7 @@ public class ClassDB extends SQLiteOpenHelper {
 	}
 */
 	//删除指定的课程，返回true表示成功,返回false表示失败
-	public boolean deleteClass(int WN,int WD,int CN)
+	public boolean deleteClass(String currentClassSheetName,int WN,int WD,int CN)
 	{		
 		timeProcess tp=new timeProcess();
 		int daynum=tp.weekAndWeekDayToDayNum(WN,WD);
@@ -394,9 +412,16 @@ public class ClassDB extends SQLiteOpenHelper {
 			String[] selArgs=new String[2];
 			selArgs[0]=String.valueOf(daynum);
 			selArgs[1]=String.valueOf(CN);
+			String[] selArgsShhetName=new String[1];
+			selArgsShhetName[0]=currentClassSheetName;
+			Cursor cursor=pClassDB.query(CLASS_SHEET_NAME, null,"SheetName=?", selArgsShhetName, null, null, null);
+			cursor.moveToFirst();
+			int sheetIDColumnIndex=cursor.getColumnIndex("SheetID");
+			int classSheetID=cursor.getInt(sheetIDColumnIndex);
+			String tableName="CDT"+String.valueOf(classSheetID);	
 //			pClassDB=SQLiteDatabase.openDatabase(DATABASE_NAME, null, SQLiteDatabase.OPEN_READWRITE|SQLiteDatabase.CREATE_IF_NECESSARY);
 			//直接删除，不做保护
-			pClassDB.delete(currentClassDetailTableName, sel, selArgs);
+			pClassDB.delete(tableName, sel, selArgs);
 //			pClassDB.delete(TABLE_NAME, null, null);
 		}catch(Exception e)
 		{
@@ -409,10 +434,10 @@ public class ClassDB extends SQLiteOpenHelper {
 		return true;
 	}
 	//删除指定的课程，返回true表示成功,返回false表示失败
-	public boolean deleteClass(int WD,int CN)
+	public boolean deleteClass(String currentClassSheetName,int WD,int CN)
 	{	
-		int WN=getCurrentWeekNum();
 		timeProcess tp=new timeProcess();
+		int WN=tp.dateToDefaultWeekNum(new Date());
 		int daynum=tp.weekAndWeekDayToDayNum(WN,WD);
 		SQLiteDatabase pClassDB=this.getWritableDatabase();
 		Log.d(DEBUG_TAG, "delete Class"+String.valueOf(WN)+" "+String.valueOf(WD)+" "+String.valueOf(CN));
@@ -422,9 +447,16 @@ public class ClassDB extends SQLiteOpenHelper {
 			String[] selArgs=new String[2];
 			selArgs[0]=String.valueOf(daynum);
 			selArgs[1]=String.valueOf(CN);
+			String[] selArgsShhetName=new String[1];
+			selArgsShhetName[0]=currentClassSheetName;
+			Cursor cursor=pClassDB.query(CLASS_SHEET_NAME, null,"SheetName=?", selArgsShhetName, null, null, null);
+			cursor.moveToFirst();
+			int sheetIDColumnIndex=cursor.getColumnIndex("SheetID");
+			int classSheetID=cursor.getInt(sheetIDColumnIndex);
+			String tableName="CDT"+String.valueOf(classSheetID);	
 //			pClassDB=SQLiteDatabase.openDatabase(DATABASE_NAME, null, SQLiteDatabase.OPEN_READWRITE|SQLiteDatabase.CREATE_IF_NECESSARY);
 			//直接删除，不做保护
-			pClassDB.delete(currentClassDetailTableName, sel, selArgs);
+			pClassDB.delete(tableName, sel, selArgs);
 //			pClassDB.delete(TABLE_NAME, null, null);
 		}catch(Exception e)
 		{
@@ -462,20 +494,38 @@ public class ClassDB extends SQLiteOpenHelper {
 		}
 		try
 		{
-			String[] sheetName=new String[1];
-			sheetName[0]=cs.getClassSheetName();
-			cursor=db.query(CLASS_SHEET_NAME, null, "SheetName "+"=?", sheetName, null, null, null);
+			String[] args=new String[1];
+			args[0]=String.valueOf(cs.getClassSheetID());
+			cursor=db.query(CLASS_SHEET_NAME, null, "SheetID =?", args, null, null, null);
 			//判断是更新还是新插入
 			if(cursor.getCount()>0)//表示更新
 			{
-				Log.d(DEBUG_TAG, "updating ClassSheet "+sheetName);
-				int updateResult=db.update(CLASS_SHEET_NAME, cv, "SheetName"+"=?", sheetName);
+				Log.d(DEBUG_TAG, "updating ClassSheet "+args[0]);
+				db.update(CLASS_SHEET_NAME, cv, "SheetID =?", args);
 			}
-			else//表示是插入
+			else//表示是插入，即新建一个classSheet，此时需要新建配套的classTable，noteTable和 homeWorkTable
 			{
-				Log.d(DEBUG_TAG, "inserting ClassSheet "+sheetName);
-				long insertResult=db.insert(CLASS_SHEET_NAME, null, cv);
-				if(insertResult==0)insertResult=2;
+				Log.d(DEBUG_TAG, "inserting ClassSheet "+args[0]);
+				db.insert(CLASS_SHEET_NAME, null, cv);
+				args[0]=cs.getClassSheetName();
+				cursor=db.query(CLASS_SHEET_NAME, null, "SheetName"+"=?", args, null, null, null);
+		 		cursor.moveToFirst();
+				int sheetIDColumnIndex=cursor.getColumnIndex("SheetID");
+				//查到该课表在table里面ID值后，转换为String类型，用于生成其他table的名字
+				int classSheetID=cursor.getInt(sheetIDColumnIndex);
+				cursor.close();
+				//创建ClassDetailTable
+				String classDetailTableName="CDT"+String.valueOf(classSheetID);
+				Log.d(DEBUG_TAG, "Creating ClassDetailTable "+classDetailTableName);
+				db.execSQL(CREATE_CLASS_DETAIL_TABLE_HEAD+classDetailTableName+CREATE_CLASS_DETAIL_TABLE_TAIL);
+				//创建HomeworkTable
+				String homeworkTableName="HWT"+String.valueOf(classSheetID);
+				Log.d(DEBUG_TAG, "Creating ClassDetailTable "+homeworkTableName);
+				db.execSQL(CREATE_HOMEWORK_TABLE_HEAD+homeworkTableName+CREATE_HOMEWORK_TABLE_TAIL);	
+				//创建NotesTable
+				String notesTableName="NT"+String.valueOf(classSheetID);
+				Log.d(DEBUG_TAG, "Creating ClassDetailTable "+notesTableName);
+				db.execSQL(CREATE_NOTES_TABLE_HEAD+notesTableName+CREATE_NOTES_TABLE_TAIL);	
 			}
 		}catch(Exception e)
 		{
@@ -488,7 +538,106 @@ public class ClassDB extends SQLiteOpenHelper {
 //			db.close();
 		}
 	}
-	
+	public void writeClassSheet(ClassSheet cs)
+	{
+		SQLiteDatabase db = null;
+		ContentValues cv=new ContentValues();
+		Date date=cs.getdateStart();
+		Cursor cursor=null;
+		cv.put("SheetName", cs.getClassSheetName());
+		cv.put("YearOfStart", date.getYear());
+		cv.put("MonthOfStart", date.getMonth());
+		cv.put("DateOfStart", date.getDate());
+		cv.put("MaxClassPerDay", cs.getMaxClassNumPerDay());
+		cv.put("MinutersForPerClass",cs.getMinuteForPerClass());
+		for(int i=0;i<cs.getMaxClassNumPerDay();i++)
+		{	//写入上课时间
+			cv.put("MinutesForClass"+String.valueOf(i+1), cs.getClassTimeMinuter(i));
+		}
+		try
+		{
+			db=this.getWritableDatabase();
+			String[] args=new String[1];
+			args[0]=String.valueOf(cs.getClassSheetID());
+			cursor=db.query(CLASS_SHEET_NAME, null, "SheetID =?", args, null, null, null);
+			//判断是更新还是新插入
+			if(cursor.getCount()>0)//表示更新
+			{
+				Log.d(DEBUG_TAG, "updating ClassSheet "+args[0]);
+				db.update(CLASS_SHEET_NAME, cv, "SheetID =?", args);
+			}
+			else//表示是插入
+			{
+				Log.d(DEBUG_TAG, "inserting ClassSheet "+args[0]);
+				db.insert(CLASS_SHEET_NAME, null, cv);
+				//插入后读出该sheet的ID，后面建立对应的table
+				args[0]=cs.getClassSheetName();
+				cursor=db.query(CLASS_SHEET_NAME, null, "SheetName =?", args, null, null, null);
+		 		cursor.moveToFirst();
+				int sheetIDColumnIndex=cursor.getColumnIndex("SheetID");
+				//查到该课表在table里面ID值后，转换为String类型，用于生成其他table的名字
+				int classSheetID=cursor.getInt(sheetIDColumnIndex);
+				cursor.close();
+				//创建ClassDetailTable
+				String classDetailTableName="CDT"+String.valueOf(classSheetID);
+				Log.d(DEBUG_TAG, "Creating ClassDetailTable "+classDetailTableName);
+				db.execSQL(CREATE_CLASS_DETAIL_TABLE_HEAD+classDetailTableName+CREATE_CLASS_DETAIL_TABLE_TAIL);
+				//创建HomeworkTable
+				String homeworkTableName="HWT"+String.valueOf(classSheetID);
+				Log.d(DEBUG_TAG, "Creating ClassDetailTable "+homeworkTableName);
+				db.execSQL(CREATE_HOMEWORK_TABLE_HEAD+homeworkTableName+CREATE_HOMEWORK_TABLE_TAIL);	
+				//创建NotesTable
+				String notesTableName="NT"+String.valueOf(classSheetID);
+				Log.d(DEBUG_TAG, "Creating ClassDetailTable "+notesTableName);
+				db.execSQL(CREATE_NOTES_TABLE_HEAD+notesTableName+CREATE_NOTES_TABLE_TAIL);
+			}
+		}catch(Exception e)
+		{
+			Log.e(DEBUG_TAG,"writing ClassSheet Error");
+		}
+		finally
+		{
+			if(cursor!=null)cursor.close();
+			if(db!=null)db.close();
+		}
+	}
+	//根据名字删除课表
+	public boolean deleteClassSheet(String sheetName)
+	{	
+		SQLiteDatabase pClassDB=this.getWritableDatabase();
+		Log.d(DEBUG_TAG, "delete Class Sheet"+sheetName);
+		try
+		{
+			String sel="SheetName=?";
+			String[] selArgs=new String[1];
+			selArgs[0]=sheetName;
+			Cursor cursor=pClassDB.query(CLASS_SHEET_NAME, null, sel, selArgs, null, null, null);
+			cursor.moveToFirst();
+			int sheetIDColumnIndex=cursor.getColumnIndex("SheetID");
+			//查到该课表在table里面ID值后，转换为String类型，用于生成其他table的名字
+			int classSheetID=cursor.getInt(sheetIDColumnIndex);
+			cursor.close();
+			String tableName="CDT"+String.valueOf(classSheetID);
+			Log.d(DEBUG_TAG, "deleting ClassDetailTable "+tableName);
+			pClassDB.execSQL("DROP TABLE "+tableName);
+			tableName="HWT"+String.valueOf(classSheetID);
+			Log.d(DEBUG_TAG, "deleting ClassDetailTable "+tableName);
+			pClassDB.execSQL("DROP TABLE "+tableName);	
+			tableName="NT"+String.valueOf(classSheetID);
+			Log.d(DEBUG_TAG, "deleting ClassDetailTable "+tableName);
+			pClassDB.execSQL("DROP TABLE "+tableName);						
+			//直接删除，不做保护
+			pClassDB.delete(CLASS_SHEET_NAME, sel, selArgs);			
+		}catch(Exception e)
+		{
+			Log.e(DEBUG_TAG,"deleting class Error");
+		}
+		finally
+		{
+			pClassDB.close();
+		}
+		return true;
+	}
 	public ClassSheet readClassSheet(String classSheetName)
 	{
 		SQLiteDatabase db;
@@ -499,12 +648,12 @@ public class ClassDB extends SQLiteOpenHelper {
 			db=this.getReadableDatabase();
 			String[] sheetName=new String[1];
 			sheetName[0]=classSheetName;
-			Log.d(DEBUG_TAG, "reading ClassSheet: "+sheetName);
+			Log.d(DEBUG_TAG, "reading ClassSheet: "+classSheetName);
 			cursor=db.query(CLASS_SHEET_NAME, null, "SheetName"+"=?", sheetName, null, null, null);
 			//判断是更新还是新插入
 			if(cursor.getCount()!=0)
 			{
-				Log.d(DEBUG_TAG, "reading ClassSheet: "+sheetName+" success");
+				Log.d(DEBUG_TAG, "reading ClassSheet: "+classSheetName+" success");
 				cs=new ClassSheet(classSheetName);
 				cursor.moveToFirst();
 				int index2=cursor.getColumnCount();
@@ -523,7 +672,7 @@ public class ClassDB extends SQLiteOpenHelper {
 					cs.setClassTimeMinuter(cursor.getInt(i+7), i);
 				}
 			}
-			else//表示是插入
+			else
 			{
 				Log.d(DEBUG_TAG, "reading ClassSheet: "+sheetName+" fail");
 			}
@@ -534,15 +683,17 @@ public class ClassDB extends SQLiteOpenHelper {
 		}
 		finally
 		{
-			cursor.close();
+			if(cursor!=null)cursor.close();
 		}
 		return cs;
 	}
+	
 	//读取当前课表
-	public ClassSheet getCurrentClassSheet()
-	{
-		return readClassSheet(currentClassSheetName);
-	}
+//	public ClassSheet getCurrentClassSheet()
+//	{
+//		return readClassSheet(currentClassSheetName);
+//	}
+/*
 	public void setTableName()
 	{
 		ClassSheet cs=readClassSheet(currentClassSheetName);
@@ -551,7 +702,7 @@ public class ClassDB extends SQLiteOpenHelper {
 		currentHomeworkTableName="HWT"+String.valueOf(currentClassSheetID);
 		currentNotesTableName="NT"+String.valueOf(currentClassSheetID);
 	}
-	//读取课表名称列表
+*/	//读取课表名称列表
 	public String[] readClassSheetList()
 	{
 		Cursor cursor=null;
@@ -567,7 +718,6 @@ public class ClassDB extends SQLiteOpenHelper {
 			cursor=db.query(CLASS_SHEET_NAME, columns, null, null, null, null, null);
 			cursor.moveToFirst();
 			int listCount=cursor.getCount();
-			//判断是更新还是新插入
 			if(listCount!=0)
 			{
 				Log.d(DEBUG_TAG, "reading ClassSheet list success");
@@ -575,9 +725,10 @@ public class ClassDB extends SQLiteOpenHelper {
 				for(int i=0;i<listCount;i++)
 				{
 					nameList[i]=cursor.getString(0);
+					cursor.moveToNext();
 				}
 			}
-			else//表示是插入
+			else
 			{
 				Log.d(DEBUG_TAG, "reading ClassSheet list fail");
 			}
@@ -592,11 +743,4 @@ public class ClassDB extends SQLiteOpenHelper {
 		}
 		return nameList;		
 	}
-	public int getCurrentWeekNum()
-	{
-		timeProcess tp=new timeProcess();
-		ClassSheet cs=getCurrentClassSheet();
-		return tp.weekOffset(cs.getdateStart(), new Date());
-	}
-
 }

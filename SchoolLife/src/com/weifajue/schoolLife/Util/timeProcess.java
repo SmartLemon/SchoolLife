@@ -13,8 +13,10 @@ import android.text.format.Time;
  */
 public class timeProcess {
 
+	//设置默认开始时间，为2000年1月1日(Date的年份是从1900开始算的，所以2000-1900=100
+	final static Date DEFAULT_BEGIN_DATE=new Date(100,0,1);
 	//计算两个日期之间相差的天数
-	public int dayOffset(Date beginDate,Date endDate)
+	private int dayOffset(Date beginDate,Date endDate)
 	{
 		long diff;
 		//从0点0分0秒开始比较
@@ -34,7 +36,7 @@ public class timeProcess {
 			diff=endDate.getTime()-beginDate.getTime();
 		}
 						//1000*60*60*24
-		return (int)diff/86400000;
+		return Integer.valueOf(String.valueOf(diff/86400000));
 	}
 	//计算两个日期之间的周差
 	public int weekOffset(Date beginDate,Date endDate)
@@ -65,6 +67,14 @@ public class timeProcess {
 	{
 		return 1+dayOffset(beginDate,endDate);
 	}
+	public int dateToDefaultWeekNum(Date endDate)
+	{
+		return 1+weekOffset(DEFAULT_BEGIN_DATE,endDate);
+	}
+	public int dateToDefaultDayNum(Date endDate)
+	{
+		return 1+dayOffset(DEFAULT_BEGIN_DATE,endDate);
+	}	
 	//根据开始时间和第几天，算出当天的日期
 	public Date dayNumToDate(Date beginDate,int DN)
 	{

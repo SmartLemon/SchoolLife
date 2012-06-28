@@ -11,10 +11,12 @@ import java.util.Map;
 
 import com.weifajue.schoolLife.Util.timeProcess;
 import com.weifajue.schoolLife.data.ClassDB;
+import com.weifajue.schoolLife.data.LocalFile;
 import com.weifajue.schoolLife.model.Class;
 import com.weifajue.schoolLife.model.ClassSheet;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 //import android.database.Cursor;
 import android.os.Bundle;
 import android.widget.ImageView;
@@ -31,15 +33,9 @@ import android.widget.*;
  */
 public class viewClass extends Activity{
 	
-//	private static final int MAX_CLASSES_PER_DAY = 5;
-
 	ListView mListView;
-	
 	public TabHost mainTabHost;
-	
-
-	private static String[] classNum = new String[]
-	{ "第一节", "第二节", "第三节", "第四节", "第五节" };
+	private String currentClassSheetName;
 	
 	private static String[] classListContent=new String[]
 	{
@@ -65,32 +61,27 @@ public class viewClass extends Activity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         Log.e("DebugLog","run in main");
+        LocalFile localFile=new LocalFile();
+        //获取当前的默认ClassSheetName
+        currentClassSheetName=localFile.getCurrentClassSheetName(this); 
+        //从下代码做异常保护，防止从localFile中读到的sheetName在DB中没有保存
+        ClassDB pDB=new ClassDB(this);
+        String[] sheetList=pDB.readClassSheetList();
+        int sheetNum=sheetList.length;
+        int i=0;
+        for(i=0;i<sheetNum;i++)
+        {
+        	if(currentClassSheetName==sheetList[i])break;
+        }
+        if(i==sheetNum)
+        {	//如果没有保存，则数据存中有值，则将第一个设置为默认
+        	if(sheetNum>0)currentClassSheetName=sheetList[0];
+        	else currentClassSheetName="default";
+        }
         personalPage();
     }
-/* *****************************************个人页面处理方法*********************************************/
-/*
-*  注意：setContentView(R.layout.main)语句必须放在最前
-*/
     public void personalPage()
     {
-//    	LinearLayout mLinearLayout=new LinearLayout(this);
-        setContentView(R.layout.main);
-        
-//        setContentView(R.layout.listviewitem);
-//        mListView=new ListView(this);
-       
-//        setContentView(R.layout.main);
-//        mLinearLayout=(LinearLayout)findViewById(R.id.mainLinearLayout);
-/*      2012-3-10日改动，本来直接加载ListView显示课程内容，重新设计为使用tabHost来承载
- * 		在后面loadTabView函数中来实现，将ListView加到TabView中 
- * 		LinearLayout.LayoutParams param=new LinearLayout.LayoutParams(
-        		LinearLayout.LayoutParams.FILL_PARENT,
-        		LinearLayout.LayoutParams.WRAP_CONTENT);
-        loadClassList();
-        mLinearLayout.addView(mListView,param);
-*/
-        //listview控件初始化,必须在TabHost之前，因为tabhost会用到
-//    	mListView=new ListView(this);
     	mListView=(ListView)findViewById(R.id.listViewClassList);
     	    	
         //TabHost控件初始化
@@ -202,8 +193,7 @@ public class viewClass extends Activity{
         
         Log.e("DebugLog","show personalPage View");
     }
-/*****************************************个人页面处理方法 end********************************************/
- 
+
     //加载课程表内容到ListView中
     //传入参数WD表示要加载星期几的数据，1~7分别表示星期一至星期日
     public void loadClassList(int WD)
@@ -211,11 +201,12 @@ public class viewClass extends Activity{
     	ClassDB classDBforList=new ClassDB(viewClass.this);
     	Log.d("DatabaseDebug", "in loadClassList");
     	List<Map<String, Object>> appItems = new ArrayList<Map<String, Object>>();
-		ClassSheet cCS=classDBforList.getCurrentClassSheet();
+		ClassSheet cCS=classDBforList.readClassSheet(currentClassSheetName);
 		timeProcess tp=new timeProcess();
-		int WN=tp.weekOffset(cCS.getdateStart(), new Date());		
-		Class[] classTemp=classDBforList.readClassDayList(WN,WD); 
-		int classnumbers=classTemp.length;
+		int WN=tp.dateToDefaultWeekNum(new Date());		
+		Class[] classTemp=classDBforList.readClassDayList(currentClassSheetName,WN,WD); 
+		int classnumbers=0;
+		if(classTemp!=null)classnumbers=classTemp.length;//做null指针保护，读不到课程时，防止classTemp.length引发异常
 		int maxClass=cCS.getMaxClassNumPerDay();
     	for(int CN=0;CN<maxClass;CN++)    		
 		{
@@ -228,7 +219,7 @@ public class viewClass extends Activity{
 	    		if(classTemp[j].getClassNum()==CN)
 	    		{
 	    			appItem.put(classListContent[0], String.valueOf(classTemp[j].getMinutesForClass()));    		
-	    			appItem.put(classListContent[1], classNum[classTemp[j].getClassNum()-1]);    	    		
+	    			appItem.put(classListContent[1], "第"+(CN+1)+"节");    	    		
 	    			appItem.put(classListContent[2], classTemp[j].getClassName());  
 	    			appItem.put(classListContent[3], classTemp[j].getTeacherName());  
 	    			appItem.put(classListContent[4], "上课教室"); 

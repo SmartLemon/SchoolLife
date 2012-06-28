@@ -32,10 +32,17 @@ public class ClassSheet {
 		minuteForPerClass=40;
 		classTimeHour=new int[20];
 		classTimeMinuter=new int[20];
+		classSheetID=9999;//默认ID设置为较大值，为了不跟已有的冲突
 	}
 	public ClassSheet()
 	{
-		
+		this.classSheetName = "default";
+		dateStart=new Date();
+		maxClassNumPerDay=8;
+		minuteForPerClass=40;
+		classTimeHour=new int[20];
+		classTimeMinuter=new int[20];
+		classSheetID=9999;//默认ID设置为较大值，为了不跟已有的冲突
 	}
 	
 	public String getClassSheetName() {

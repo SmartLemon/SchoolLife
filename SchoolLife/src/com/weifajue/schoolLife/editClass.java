@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.weifajue.schoolLife.data.ClassDB;
+import com.weifajue.schoolLife.data.LocalFile;
 import com.weifajue.schoolLife.model.Class;
 
 import android.app.Activity;
@@ -54,11 +55,16 @@ public class editClass extends Activity
 	private boolean isUpdateWDSpinner=true;
 	private boolean isUpdateCNSpinner=true;
 	
+	private String currentClassSheetName;
+	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.editclasslist);
         Log.e("DebugLog","run in editClass Activity");
     	
+        LocalFile lf=new LocalFile();
+        currentClassSheetName=lf.getCurrentClassSheetName(this);
+        
         //根据节数初始化数组
     	for(int i=0;i<CLASSNUM;i++)
     	{
@@ -74,7 +80,7 @@ public class editClass extends Activity
 	    	{
 	    		for(int CN=0;CN<MAX_CLASSES_PER_DAY;CN++)
 	    		{	
-	    			if(cDB.readClass(CN+1, WD+1)==null)
+	    			if(cDB.readClass(currentClassSheetName,CN+1, WD+1)==null)
 	    			{
 	    				classIndicaterTable[WD][CN]=CLASS_INDICATER_EMPTY;
 	    				classIndicaterTable_New[WD][CN]=CLASS_INDICATER_EMPTY;
@@ -253,7 +259,7 @@ public class editClass extends Activity
 	    		{
 		    		//选择后将对应的课程信息刷新到edit text控件中
 		    		ClassDB cDB=new ClassDB(editClass.this);
-		    		Class cc=cDB.readClass(m_ClassNum, m_WeekDay);
+		    		Class cc=cDB.readClass(currentClassSheetName,m_ClassNum, m_WeekDay);
 		    		if(cc!=null)
 		    		{
 		    			etClassName.setText(cc.getClassName());
@@ -294,7 +300,7 @@ public class editClass extends Activity
 	    		{
 		    		//选择后将对应的课程信息刷新到edit text控件中
 		    		ClassDB cDB=new ClassDB(editClass.this);
-		    		Class cc=cDB.readClass(m_ClassNum, m_WeekDay);
+		    		Class cc=cDB.readClass(currentClassSheetName,m_ClassNum, m_WeekDay);
 		    		if(cc!=null)
 		    		{
 		    			etClassName.setText(cc.getClassName());
@@ -361,7 +367,7 @@ public class editClass extends Activity
 //	    		Class C=new Class(m_ClassNum,m_WeekDay,m_ClassName,m_TeacherName,m_ContinuumClass,m_ClassTimeHour,m_ClassTimeMinute);
 	    		Class C=new Class();
 	    		//先将主编辑界面的课程信息写入数据库，之后再读取指示表中的内容
-	    		cDB.writeClass(C);
+	    		cDB.writeClass(currentClassSheetName,C);
 	    		int WD=0,CN=0;
 	    		for(WD=0;WD<7;WD++)
 	    		{
@@ -371,7 +377,7 @@ public class editClass extends Activity
 	    				{
 	    					C.setWeekDay(WD+1);
 	    					C.setClassNum(CN+1);
-	                		cDB.writeClass(C);
+	                		cDB.writeClass(currentClassSheetName,C);
 	                		//更新两个指示表的内容
 	                		classIndicaterTable[WD][CN]=CLASS_INDICATER_OCCUPIED;
 	                		classIndicaterTable_New[WD][CN]=CLASS_INDICATER_OCCUPIED;
@@ -387,7 +393,7 @@ public class editClass extends Activity
 	    	public void onClick(View v)
 	    	{
 	    		ClassDB cDB=new ClassDB(editClass.this);
-	    		cDB.deleteClass(m_ClassNum, m_WeekDay);
+	    		cDB.deleteClass(currentClassSheetName,m_ClassNum, m_WeekDay);
 	    		etClassName.setText(null);
 	    		etTeacherName.setText(null);
 	    		//提供批量删除功能
@@ -398,7 +404,7 @@ public class editClass extends Activity
 	    			{
 	    				if(classIndicaterTable_New[WD][CN]==CLASS_INDICATER_SELECTED)
 	    				{
-	    					cDB.deleteClass(CN+1,WD+1);
+	    					cDB.deleteClass(currentClassSheetName,CN+1,WD+1);
 	                		classIndicaterTable[WD][CN]=CLASS_INDICATER_EMPTY;
 	                		classIndicaterTable_New[WD][CN]=CLASS_INDICATER_EMPTY;
 	    				}
