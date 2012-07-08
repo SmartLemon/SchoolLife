@@ -6,10 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RadioGroup;
 import android.widget.TabHost;
-import android.widget.TabHost.OnTabChangeListener;
-import com.weifajue.schoolLife.*;
 
 /******SchoolLife应用主程序
  * 结构：包含3个页面:personalPage,sharingPage,managementPage

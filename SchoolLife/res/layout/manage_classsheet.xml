@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/relativeLayout11"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+
+        <LinearLayout
+            android:id="@+id/linearLayout11"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_below="@+id/managingClassSheetHeader"
+            android:orientation="vertical"
+            android:paddingBottom="60.0dip"
+			android:background="@color/gradient_end" 
+			android:paddingLeft="10dip" 
+			android:paddingRight="10dip" 
+			android:paddingTop="45dip">
+
+            <ListView
+                android:id="@+id/managingClassSheetList"
+	            android:layout_width="fill_parent"
+	            android:layout_height="fill_parent"
+                android:background="@drawable/manageview_background_sharp" 
+                android:divider="@drawable/list_divider">
+            </ListView>
+
+        </LinearLayout>
+
+	<include 
+		android:id="@+id/managingClassSheetHeader" 
+		layout="@layout/top_header" 
+		android:layout_width="fill_parent" 
+		android:layout_height="wrap_content" />
+    </RelativeLayout>
