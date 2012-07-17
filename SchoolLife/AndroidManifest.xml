@@ -23,7 +23,8 @@
 		<activity	android:name=".sharingActivity"/> 
 		<activity	android:name=".managingActivity"/> 
 		<activity	android:name=".manageClassSheet"/> 
-		<activity	android:name=".editClassSheet"/> 				                  
+		<activity	android:name=".editClassSheet"/>
+		<activity	android:name=".activity.SharingActivity"/> 				                  
     </application>
 
 </manifest>

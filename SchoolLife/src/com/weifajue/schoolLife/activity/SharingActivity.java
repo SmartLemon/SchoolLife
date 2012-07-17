@@ -5,6 +5,7 @@
 package com.weifajue.schoolLife.activity;
 
 import android.app.Activity;
+import android.os.Bundle;
 
 /** 
  * 共享的界面
@@ -14,4 +15,10 @@ import android.app.Activity;
  */
 public class SharingActivity  extends Activity {
 
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+	}
+	
 }
