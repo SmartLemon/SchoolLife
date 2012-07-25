@@ -26,7 +26,21 @@ public class Class {
 	{
 		weekNum=1;
 	}
-	
+	public Class(Class c)//使用一个class来生成另一个class，相当于拷贝
+	{
+		this.weekNum=c.getWeekNum();
+		this.weekDay=c.getWeekDay();//星期
+		this.classNum=c.getClassNum();//节序号
+		this.className=c.getClassName();//课程名称
+		this.teacherName=c.getTeacherName();//教师名字
+		this.minutesForClass=c.getMinutesForClass();//上课时间的分钟数(从0点开始的分钟数)
+		this.classRoom=c.getClassRoom();//上课地点
+		this.homeworkIndex=c.getHomeworkIndex();//对应作业在作业的数据库表中的序号
+		this.notesIndex=c.getNotesIndex();//对应笔记在笔记数据库中的序号
+		this.isSingin=c.isSingin();//判断该课程是否已经签到
+		this.rate=c.getRate();//评分
+		this.comment=c.getComment();//评价		
+	}
 	public Class(int WN,int WD,int CN,String CNa,String TN)
 	{
 		weekNum=WN;
