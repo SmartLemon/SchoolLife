@@ -44,7 +44,7 @@ public class timeProcess {
 		int dayOffset=dayOffset(beginDate,endDate);
 		//从beginDate开始那周算第一周
 		return ((dayOffset+beginDate.getDay()-1)/7);
-		//getDay返回DAYS_OF_WEEK,从0到6分别如下:
+		//getDay返回DAYS_OF_WEEK,从1到7分别如下:
 		//SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, and SATURDAY.
 	}
 	public Time minutesToTime(int minutes)

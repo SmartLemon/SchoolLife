@@ -279,6 +279,7 @@ public class ClassDB extends SQLiteOpenHelper {
 		try
 		{
 			pClassDB=this.getReadableDatabase();
+			pClassDB.beginTransaction();
 			String[] selArgsShhetName=new String[1];
 			selArgsShhetName[0]=currentClassSheetName;
 			cursor=pClassDB.query(CLASS_SHEET_NAME, null,"SheetName=?", selArgsShhetName, null, null, null);
@@ -313,6 +314,8 @@ public class ClassDB extends SQLiteOpenHelper {
 						if(cursor.moveToNext()==false)break;
 					}
 				}
+				pClassDB.setTransactionSuccessful();
+				pClassDB.endTransaction(); 
 			}
 		}catch(Exception e)
 		{

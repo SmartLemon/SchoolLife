@@ -44,6 +44,12 @@ public class viewClass extends Activity{
 	ListView mListView;
 	public TabHost mainTabHost;
 	private String currentClassSheetName;
+	private ClassSheet currentClassSheet;
+	private int currentShowedWN;
+	private int currentShowedWD;
+	private ClassDB classDB;
+	private ClassDetailListAdapter classDetailListAdapter;
+
 	
 	public View topHeader;//标题头
 	
@@ -72,8 +78,8 @@ public class viewClass extends Activity{
         //获取当前的默认ClassSheetName
         currentClassSheetName=localFile.getCurrentClassSheetName(this); 
         //以下代码做异常保护，防止从localFile中读到的sheetName在DB中没有保存
-        ClassDB pDB=new ClassDB(this);
-        String[] sheetList=pDB.readClassSheetList();
+        classDB=new ClassDB(this);
+        String[] sheetList=classDB.readClassSheetList();
         int sheetNum=sheetList.length;
         int i=0;
         for(i=0;i<sheetNum;i++)
@@ -85,7 +91,9 @@ public class viewClass extends Activity{
         	if(sheetNum>0)currentClassSheetName=sheetList[0];
         	else currentClassSheetName="default";
         }
-        
+        currentClassSheet=classDB.readClassSheet(currentClassSheetName);
+        currentShowedWN=currentClassSheet.getCurrentWeekNum();
+        classDetailListAdapter=new ClassDetailListAdapter(viewClass.this);
         setupTopHeader();
         
         setupListFrame();
@@ -96,6 +104,8 @@ public class viewClass extends Activity{
     	topHeader=(View)findViewById(R.id.main_header);
 		Button leftButton=(Button)topHeader.findViewById(R.id.top_btn_left);
 		Button rightButton=(Button)topHeader.findViewById(R.id.top_btn_right);
+		final TextView top_textView=(TextView)topHeader.findViewById(R.id.tv_toptitle);
+		top_textView.setText("第"+String.valueOf(currentShowedWN)+"周");
 		//左键响应函数，显示前一周的课表
 		leftButton.setOnClickListener(new OnClickListener()
 		{
@@ -103,6 +113,9 @@ public class viewClass extends Activity{
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
+				if(currentShowedWN>1)currentShowedWN--;
+				classDetailListAdapter.notifyDataSetChanged();
+				top_textView.setText("第"+String.valueOf(currentShowedWN)+"周");
 			}
 			
 		});
@@ -113,12 +126,15 @@ public class viewClass extends Activity{
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				
+				/**
+				 * 暂时没有设上限
+				 */
+				currentShowedWN++;
+				classDetailListAdapter.notifyDataSetChanged();
+				top_textView.setText("第"+String.valueOf(currentShowedWN)+"周");
 			}
 			
 		});
-		TextView top_textView=(TextView)topHeader.findViewById(R.id.tv_toptitle);
-		top_textView.setText("管理课表");
     }
     
     public void setupListFrame()
@@ -177,37 +193,39 @@ public class viewClass extends Activity{
         	{
         		if(tabId=="日")
         		{
-        			loadClassList(0);
+        			currentShowedWD=0;
         		}
         		else if(tabId=="一")
         		{
-        			loadClassList(1);
+        			currentShowedWD=1;
         		}
         		else if(tabId=="二")
         		{
-        			loadClassList(2);
+        			currentShowedWD=2;
         		}
         		else if(tabId=="三")
         		{
-        			loadClassList(3);
+        			currentShowedWD=3;
         		}
         		else if(tabId=="四")
         		{
-        			loadClassList(4);
+        			currentShowedWD=4;
         		}
         		else if(tabId=="五")
         		{
-        			loadClassList(5);
+        			currentShowedWD=5;
         		
         		}else if(tabId=="六")
         		{
-        			loadClassList(6);
+        			currentShowedWD=6;
         		}
+        		classDetailListAdapter.notifyDataSetChanged();
         	}
         });
         //默认开始显示周一的课程,会自动调用setOnTabChangedListener
         mainTabHost.setCurrentTab(1);
-
+        
+        mListView.setAdapter(classDetailListAdapter);
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
         {
         	@Override
@@ -224,58 +242,41 @@ public class viewClass extends Activity{
         Log.e("DebugLog","show personalPage View");
     }
 
-    //加载课程表内容到ListView中
-    //传入参数WD表示要加载星期几的数据，0~6分别表示星期一至星期日
-    public void loadClassList(int WD)
-    {
-    	ClassDB classDBforList=new ClassDB(viewClass.this);
-    	Log.d("DatabaseDebug", "in loadClassList");
-		ClassSheet cCS=classDBforList.readClassSheet(currentClassSheetName);    	
-//		timeProcess tp=new timeProcess();
-//		int WN=tp.dateToDefaultWeekNum(new Date());		
-//		Class[] classList=classDBforList.readClassDayList(currentClassSheetName,WN,WD); 
-		Class[] classList=classDBforList.readClassTemplateByDay(currentClassSheetName, WD);
-		ClassDetailListAdapter classDetailListAdapter=new ClassDetailListAdapter(viewClass.this,classList,cCS);
-		mListView.setAdapter(classDetailListAdapter);
- 	}
-
     /**
      * @author SmartGang
      * 显示页面ListView控件的内容适配器
-     * 在getView中同时读取模板查询templateCursor和信息查询结果detailCursor
-     * 对两个结果同一节课的内容进行对比，如果课程相同，则表示detailCursor的内容为正常课表内容
-     * 如果不同且detailCursor内容不为空，表示课程已被修改，detailCursor显示为历史信息
+     * 在getView中同时读取模板查询classTemplateList和信息查询结果classDetailList
+     * 对两个结果同一节课的内容进行对比，如果课程相同，则表示classDetailList的内容为正常课表内容
+     * 如果不同且classDetailList内容不为空，表示课程已被修改，classTemplateList显示为历史信息
      */
     private class ClassDetailListAdapter extends BaseAdapter
     {
 		private LayoutInflater layoutInflater;
 		Context context;
-		Class[] classList;
-		ClassSheet classSheet;
+		Class[] classTemplateList, classDetailList;
 			
-		public ClassDetailListAdapter(Context context, Class[] cl, ClassSheet cs)
+		public ClassDetailListAdapter(Context context)
 		{	//传入classList的指针做为该adapter显示的内容
 			this.context = context;
 			layoutInflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			classList=cl;
-			classSheet=cs;
+			classTemplateList=classDB.readClassTemplateByDay(currentClassSheetName, currentShowedWD);			
 		}
 		
 		@Override
 		public int getCount() {
 			// TODO Auto-generated method stub
-			return classSheet.getMaxClassNumPerDay();
+			return currentClassSheet.getMaxClassNumPerDay();
 		}
 
 		@Override
 		public Object getItem(int arg0) {
 			// TODO Auto-generated method stub
 			//该位置有课，则返该课程，否则返回为空
-			int i=classList.length;
+			int i=classTemplateList.length;
 			for(int j=0;j<i;j++)
 			{
-				if(arg0==classList[j].getClassNum())
-					return classList[j];
+				if(arg0==classTemplateList[j].getClassNum())
+					return classTemplateList[j];
 			}
 			return null;
 		}
@@ -296,9 +297,12 @@ public class viewClass extends Activity{
 			TextView tvTeacherName	= (TextView) rl.findViewById(R.id.textViewTeacherName);
 			TextView tvClassRoom	= (TextView) rl.findViewById(R.id.textViewClassLocation);
 			
-			int timeMuninute=classSheet.getClassTimeMinuter(position);
+			classTemplateList=classDB.readClassTemplateByDay(currentClassSheetName, currentShowedWD);
+			classDetailList=classDB.readClassDayList(currentClassSheetName, currentShowedWN, currentShowedWD);
+			
+			int timeMuninute=currentClassSheet.getClassTimeMinuter(position);
 			String classTime=String.valueOf(timeMuninute/60+6)+":"+String.valueOf(timeMuninute%60);
-			if(null==classList[position])
+			if(null==classTemplateList[position])
 			{
 				tvClassName.setText("没课真好！！");
 				tvClassTime.setText(classTime);
@@ -308,12 +312,13 @@ public class viewClass extends Activity{
 				}
 			else
 			{
-				tvClassName.setText(classList[position].getClassName());
+				tvClassName.setText(classTemplateList[position].getClassName());
 				tvClassTime.setText(classTime);
 				tvClassNum.setText("第"+(position+1)+"节");
-				tvTeacherName.setText(classList[position].getTeacherName());
+				tvTeacherName.setText(classTemplateList[position].getTeacherName());
 				tvClassRoom.setText("教室");				
 			}
+			
 			return rl;
 		}
     	
