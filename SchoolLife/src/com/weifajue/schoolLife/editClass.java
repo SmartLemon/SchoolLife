@@ -1,481 +1,467 @@
 package com.weifajue.schoolLife;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Vector;
 
 import com.weifajue.schoolLife.data.ClassDB;
 import com.weifajue.schoolLife.data.LocalFile;
 import com.weifajue.schoolLife.model.Class;
+import com.weifajue.schoolLife.model.ClassSheet;
 
 import android.app.Activity;
-import android.app.TimePickerDialog;
+import android.content.Context;
 import android.os.Bundle;
 
 import android.util.Log;
 import android.widget.*;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.LinearLayout.LayoutParams;
+import android.widget.RelativeLayout.LayoutParams;
 import android.view.*;
+import android.view.View.OnClickListener;
 
 public class editClass extends Activity
 {
-	private static final String[] pWeekDay={"一","二","三","四","五","六","日"};
-	private static final String[] pContinuumClass={"0","1","2","3","4","5","6"};
-	private static final int MAX_CLASSES_PER_DAY=5;
-	private static final int CLASSNUM=MAX_CLASSES_PER_DAY;
+	private static final int[] ImageViewIDsForList={
+		R.id.ivMutiEditSunday,
+		R.id.ivMutiEditMonday,
+		R.id.ivMutiEditTuesday,
+		R.id.ivMutiEditWednesday,
+		R.id.ivMutiEditThursday,
+		R.id.ivMutiEditFriday,
+		R.id.ivMutiEditSaturday
+	};
 
-	private String pClassNum[]=new String[CLASSNUM];
-	//界面标题
-	public View topHeader;
-	//控件变量定位
-	private Spinner spWeekDay,spClassNum;
-	private ArrayAdapter<String> adapterWD,adapterCN,adapterCC;
-	private Button bMultiOperate,bAdd,bDelete;
-	private Button bSetClassTime;
+	public View topHeader;	//界面标题
 	private EditText etClassName,etClassLocation,etTeacherName;
-	//全局变量
-	//课程信息
-	public int m_WeekDay=1,m_ClassNum=1;
-	public int m_ClassTimeHour=8,m_ClassTimeMinute=0;
-	public String m_ClassName,m_ClassLocation,m_TeacherName;
-	public int m_ContinuumClass=0;
-	//课程指标表，二维数组,用来保存当前一周课程表的各节指标状态
-	//两个数组,一个用来保存原始的状态，一个用来保存用户选择后新的状态
-	private int[][] classIndicaterTable=new int[7][MAX_CLASSES_PER_DAY];
-	private int[][] classIndicaterTable_New=new int[7][MAX_CLASSES_PER_DAY];
-	//表示上面指示表每一个元素的占用状态，根据该对应课程是否已设，分下面三种状态
-	private static final int CLASS_INDICATER_EMPTY=0;	//空闲
-	private static final int CLASS_INDICATER_OCCUPIED=1;//已经占用
-	private static final int CLASS_INDICATER_SELECTED=2;//当前用户选中
-	//课程指示表修改标志，用于表示在选择界面中修改了指标表
-	private boolean classTableModifyFlag=true;
-	//用来判断是否在改变下拉表时，读取更新课程内容，分别对应weekday,classnum,
-	private boolean isUpdateWDSpinner=true;
-	private boolean isUpdateCNSpinner=true;
-	
-	private String currentClassSheetName;
-	
+	private ListView lvMutiEditListView;
+	private ClassSheet classSheet;
+	private Class editingClass;
+	private boolean isEditing=false;//用于指示当前是否进入编辑状态，默认false为非编辑状态
+	/** 课程模板内容缓存器，二级对象数据
+	 * 第一级长度按课表最大节数生成，实际为每一节的列表指针
+	 * 第二级长度固定为7，即一周7天的内容
+	 * DAYS_OF_WEEK,从0到6分别如下:SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, and SATURDAY
+	 */
+	private Class[][] detailPrimaryCacher;
+	OperationVector operationRecorder;
+
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.editclasslist);
         Log.e("DebugLog","run in editClass Activity");
     	
         LocalFile lf=new LocalFile();
-        currentClassSheetName=lf.getCurrentClassSheetName(this);
-        
-        //根据节数初始化数组
-    	for(int i=0;i<CLASSNUM;i++)
-    	{
-    		pClassNum[i]=String.valueOf(i+1);
-    	}
-    	//由于完成课程指示表的选择界面后，会回调onCreate函数，
-    	//所以需要根据修改的标示，判断在这里是否需要初始化指标示表,classTableModifyFlag为true表示需要
-    	if(classTableModifyFlag==true)
-    	{
-	    	//初始化课程指示表
-	    	ClassDB cDB=new ClassDB(editClass.this);
-	    	for(int WD=0;WD<7;WD++)
-	    	{
-	    		for(int CN=0;CN<MAX_CLASSES_PER_DAY;CN++)
-	    		{	
-	    			if(cDB.readClass(currentClassSheetName,CN+1, WD+1)==null)
-	    			{
-	    				classIndicaterTable[WD][CN]=CLASS_INDICATER_EMPTY;
-	    				classIndicaterTable_New[WD][CN]=CLASS_INDICATER_EMPTY;
-	    			}
-	    			else 
-	    			{
-	    				classIndicaterTable[WD][CN]=CLASS_INDICATER_OCCUPIED;
-	    				classIndicaterTable_New[WD][CN]=CLASS_INDICATER_OCCUPIED;
-	    			}
-	    		}
-	    	}
-	    	//初始化后置为false,表示不需要再初始化
-	    	classTableModifyFlag=false;
-    	}
+        String classSheetName=lf.getCurrentClassSheetName(this);
+        //读取当前课表信息并初始化数组
+        final ClassDB cDB=new ClassDB(editClass.this);
+        classSheet=cDB.readClassSheet(classSheetName);
+        detailPrimaryCacher=new Class[classSheet.getMaxClassNumPerDay()][];//初始化数组第一级
+        for(int i=0;i<detailPrimaryCacher.length;i++)//初始化数组第二级,固定大小为7个
+        {	
+        	detailPrimaryCacher[i]=cDB.readClassTemplateByNumList(classSheetName, i);
+        }
+        //默认装载周一第一节课，在使用Spinner选择时改变
+        editingClass=cDB.readClass(classSheetName, 1, 0);      
 		//设置顶端标题栏，把左右两个按键去显示（保留位置），更改标题
 		topHeader=(View)findViewById(R.id.editClassHeader);
 		//显示向左的箭头，用于返回
-//		Button btn=(Button)topHeader.findViewById(R.id.top_btn_left);
+		Button btnLeft=(Button)topHeader.findViewById(R.id.top_btn_left);
 //		btn.setVisibility(View.INVISIBLE);
-		Button btn=(Button)topHeader.findViewById(R.id.top_btn_right);
-		btn.setVisibility(View.INVISIBLE);
+		final Button btnRight=(Button)topHeader.findViewById(R.id.top_btn_right);
+//		btn.setVisibility(View.INVISIBLE);
 		TextView top_textView=(TextView)topHeader.findViewById(R.id.tv_toptitle);
 		top_textView.setText("编辑课程");
-    	//初始化控制资源
-    	resourceInitialize();
-    }
-    //onCreate
-    
-    void setClassSelectingGrid()
-    {
-    	setContentView(R.layout.classselectinggrid);
-    	final int gridResIDs[]={R.drawable.gridwhite,R.drawable.gridgrey,R.drawable.gridyellow};
-
-    	LinearLayout ll=(LinearLayout)findViewById(R.id.linearLayoutForGridCN);
-
-    	Button bGridViewOK=(Button)findViewById(R.id.buttonGridViewOK);
-    	Button bGridViewCancel=(Button)findViewById(R.id.buttonGridViewCancel);
-    	
-    	GridView gridView=(GridView)findViewById(R.id.gridView1);
-    			
-    	List<Map<String, Object>> cells = new ArrayList<Map<String, Object>>();
-//加载grid图片，每一格代表一节课，白色格表示空，黄色表示已经选择，灰色表示已经有课程
-    	int CN=0,WD=0;
-		for (int i = 0; i < 7*MAX_CLASSES_PER_DAY; i++)
-		{
-			Map<String, Object> cell = new HashMap<String, Object>();
-			CN=i/7;
-			WD=i%7;
-			if(WD==0)WD=6;//周日WD为7,对应表格里面的WD列的编号是6
-			else WD--;
-			//按新指示表来绘制界面，这样在用户反复操作时，可以保存多次操作的结果
-			if(classIndicaterTable_New[WD][CN]==CLASS_INDICATER_OCCUPIED)
-			{	//该时间已经有课程，置灰
-				cell.put("imageview", R.drawable.gridgrey);
-			}
-			else if(classIndicaterTable_New[WD][CN]==CLASS_INDICATER_SELECTED)
-			{
-				cell.put("imageview", R.drawable.gridyellow);
-			}
-			else cell.put("imageview", R.drawable.gridwhite);
-			cells.add(cell);
-		}
-
-		for(int i=0; i< MAX_CLASSES_PER_DAY; i++)
-		{
-			//尝试使用add view的方法来增加行名
-	    	TextView tv=new TextView(this);
-	    	tv.setText(String.valueOf(i+1));
-//	    	tv.setWidth(LayoutParams.FILL_PARENT);
-	    	tv.setLayoutParams(new LayoutParams(72,72));
-	    	tv.setGravity(Gravity.CENTER);
-	    	ll.addView(tv,i);
-		}
 		
-		SimpleAdapter simpleAdapter = new SimpleAdapter(
-				this, 
-				cells,
-				R.layout.gridcell, new String[]{ "imageview" }, 
-				new int[]{ R.id.imageview }
-		);
-		gridView.setAdapter(simpleAdapter);	
+		btnRight.setText("编辑");
+		LayoutParams params = (LayoutParams) btnRight.getLayoutParams();
+		params.setMargins(0, 0, 10, 0); //substitute parameters for left, top, right, bottom
+		btnRight.setLayoutParams(params);
+		btnRight.setBackgroundColor(R.drawable.button_bkg_normal);
 		
-		gridView.setOnItemClickListener(new OnItemClickListener() 
-		{
-			public void onItemClick(AdapterView<?> parent, View v, int position, long id)
-			{
-				Toast.makeText(editClass.this, "你选择了" + (position + 1) + " 号图片", Toast.LENGTH_SHORT).show();				
-				ImageView vv=(ImageView)v;
-				int CN=position/7;
-				int WD=position%7;
-				//修正，周日在第一列，但在数组中是最后一列
-				if(WD==0)WD=7;
-//				else if(WD==0)WD=5;
-				WD--;
-				if(classIndicaterTable_New[WD][CN]==CLASS_INDICATER_SELECTED)
-				{	//如果该位置用户已经选择过，则本次选择表示取消，恢复之前的状态
-					classIndicaterTable_New[WD][CN]=classIndicaterTable[WD][CN];
-					vv.setImageResource(gridResIDs[classIndicaterTable_New[WD][CN]]);
-				}
-				else
+		//初始始化edit控件
+	    etClassName=(EditText)findViewById(R.id.etShowDetailClassName);
+	    etClassLocation=(EditText)findViewById(R.id.etShowDetailClassRoom);
+	    etTeacherName=(EditText)findViewById(R.id.etShowDetailTeacherName);	    
+	    initialEditTexts();
+	    //初始化ListView
+	    lvMutiEditListView=(ListView)findViewById(R.id.lvMutiEditClassDetial);
+	    LinearLayout headerViewForList;
+	    headerViewForList=(LinearLayout)LayoutInflater.from(editClass.this).inflate(R.layout.mutil_edit_class_detail_listview_header, null);		
+	    lvMutiEditListView.addHeaderView(headerViewForList);
+	    final DetailListItemAdapter detailListAdapter=new DetailListItemAdapter(this);
+	    lvMutiEditListView.setAdapter(detailListAdapter);
+	    
+	    /**
+	     * 返回键响应函数
+	     * detailPrimaryCacher的内容重新写回数据库表中
+	     * 完成后调用返回键功能
+	     */
+	    btnLeft.setOnClickListener(new OnClickListener()
+	    {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				for(int i=0;i<classSheet.getMaxClassNumPerDay();i++)
 				{
-					classIndicaterTable_New[WD][CN]=CLASS_INDICATER_SELECTED;
-					vv.setImageResource(gridResIDs[CLASS_INDICATER_SELECTED]);
+					cDB.writeCassByNumListIntoTemplate(classSheet.getClassSheetName(),i,detailPrimaryCacher[i]);
+				}				
+				editClass.this.finish();
+			}
+	    	
+	    });
+	    
+	    btnRight.setOnClickListener(new OnClickListener()
+	    {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				if(isEditing)//编辑状态下按下此键，进入非编辑状态
+				{
+					btnRight.setText("编辑");
+					//读取编辑信息
+					String className;
+					if(etClassName.getText()!=null)className=etClassName.getText().toString();
+					else
+					{
+						Toast.makeText(editClass.this, "请输入课程名称", Toast.LENGTH_SHORT).show();		    		
+						return;
+					}
+					String teacherName;
+					if(etTeacherName.getText()!=null)teacherName=etTeacherName.getText().toString();
+					else
+					{
+						Toast.makeText(editClass.this, "请输入老师名字", Toast.LENGTH_SHORT).show();		    		
+						return;
+					}
+					String classRoom;
+					if(etClassLocation.getText()!=null)classRoom=etClassLocation.getText().toString();
+					else
+					{
+						Toast.makeText(editClass.this, "请输入上课地点", Toast.LENGTH_SHORT).show();		    		
+						return;
+					}
+					
+					//读取控制信息并生成class写入detailPrimaryCacher中
+					UserChoic uc;
+					for(int i=0;i<operationRecorder.getSize();i++)
+					{
+						uc=(UserChoic) operationRecorder.getOperation(i);
+						//判断是添加操作还是删除操作
+						if(uc.getOperation()==UserChoic.OP_ADD)
+						{
+							Class classTemp=new Class();
+							classTemp.setClassName(className);
+							classTemp.setTeacherName(teacherName);
+							classTemp.setClassRoom(classRoom);
+							classTemp.setWeekDay(uc.WD);
+							classTemp.setClassNum(uc.CN);
+							detailPrimaryCacher[uc.CN][uc.WD]=classTemp;
+						}
+						else
+						{
+							detailPrimaryCacher[uc.CN][uc.WD]=null;
+						}
+					}
+					//进入非编辑状态
+					editingClass=detailPrimaryCacher[0][0];
+					isEditing=false;
+					initialEditTexts();
+					detailListAdapter.notifyDataSetChanged();
+				}
+				else//非编辑状态下进入编辑状态
+				{
+					btnRight.setText("完成");
+					//创建新的操作记录器
+					operationRecorder=new OperationVector();
+					isEditing=true;
+					initialEditTexts();	
+					detailListAdapter.notifyDataSetChanged();
+				}
+			}	    	
+	    });
+    }
+
+	void initialEditTexts()
+	{
+		//根据编辑状态设置控件是否可用
+		etClassName.setEnabled(isEditing);
+		etClassLocation.setEnabled(isEditing);
+		etTeacherName.setEnabled(isEditing);			
+		if(editingClass!=null)//前选中的class为非空
+		{
+			etClassName.setText(editingClass.getClassName());
+			etClassLocation.setText(editingClass.getClassRoom());
+			etTeacherName.setText(editingClass.getTeacherName());				
+		}
+		else//当前选中的class为空,则不显示内容
+		{
+			etClassName.setText(" ");
+			etClassLocation.setText(" ");
+			etTeacherName.setText(" ");					
+		}   
+	}
+
+	//
+	
+	/**
+	 * @author SmartGang
+	 *定义内部类，一个操作对象，用来保存用户的操作信息
+	 *再通过一个对象容器，就可以保存所有的用户操作信息
+	 */
+	private class UserChoic
+	{
+		//定义operation的两个操作类型，添加和删除
+		final static int OP_ADD=1;
+		final static int OP_DELETE=2;
+		int WD;
+		int CN;
+		private int operation=0;
+		UserChoic(int WD, int CN)
+		{
+			this.WD=WD;
+			this.CN=CN;
+		}
+		public void setAdd()
+		{
+			operation=OP_ADD;
+		}
+		public void setDelete()
+		{
+			operation=OP_DELETE;
+		}
+		public int getOperation()
+		{
+			return operation;
+		}
+	}
+		
+	/**
+	 * @author SmartGang
+	 *封装一个Vector容器，以满足使用需求
+	 */
+	private class OperationVector
+	{
+		Vector<UserChoic> recorder;
+		
+		OperationVector()
+		{
+			recorder=new Vector<UserChoic>();
+		}
+		
+		void addOperation(UserChoic uc)
+		{
+			recorder.addElement(uc);
+		}
+		
+		UserChoic isContain(int WD,int CN)
+		{
+			int n=recorder.size();
+			for(int i=0;i<n;i++)
+			{
+				UserChoic uc=recorder.get(i);
+				if(CN==uc.CN&&WD==uc.WD)return uc;
+			}
+			return null;
+		}
+		
+		boolean removeOperation(UserChoic UC)
+		{
+			int n=recorder.size();
+			for(int i=0;i<n;i++)
+			{
+				UserChoic uc=recorder.get(i);
+				if(UC.CN==uc.CN&&UC.WD==uc.WD)
+				{
+					recorder.remove(i);
+					return true;
+				}
+			}			
+			return false;
+		}
+		
+		int getSize()
+		{
+			return recorder.size();
+		}
+		
+		UserChoic getOperation(int index)
+		{
+			return recorder.get(index);
+		}
+	}
+	
+	private class DetailListItemAdapter extends BaseAdapter
+	{
+		private LayoutInflater layoutInflater;
+		Context context;
+			
+		public DetailListItemAdapter(Context context)
+		{
+			this.context = context;
+			layoutInflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		}
+		@Override
+		public int getCount() {
+			// TODO Auto-generated method stub
+			return classSheet.getMaxClassNumPerDay();
+		}
+
+		@Override
+		public Object getItem(int arg0) {
+			// TODO Auto-generated method stub
+			return detailPrimaryCacher[arg0];
+		}
+
+		@Override
+		public long getItemId(int position) {
+			// TODO Auto-generated method stub
+			return position;
+		}
+		/**
+		 * getView用来绘制每一列
+		 * 按下时首先要判断当前的编辑状态
+		 * 编辑状态：
+		 * 		如果editingClass为空，则将空闲位置设为空白，其余为灰色，且不响应按键事件
+		 * 		如果editingClass不为空，则将空闲位置设为空白，相同设为选中，其余设为灰且不响应按键事件
+		 * 		在按键响应函数中做如下操作：
+		 * 		查找operationRecorder，判断该位置之前是否已经操作过
+		 * 		如果已经操作过，且之前的操作为增加，则将图片设为空白,将操作记录设为删除
+		 * 		如果没有操作过，判断当前位置是否有课表，为空则操作记录为增加，将图片设为选中
+		 * 		否则增加操作记录为删除，将图片设为删除。
+		 *
+		 * 非编辑状态：
+		 * 		如果editingClass为空，则将空闲位置设为空白，其余为灰色
+		 * 		如果editingClass不为空，则将空闲位置设为空白，相同设为选中，其余设为灰
+		 * 		在按键响应函数中做如下操作：
+		 * 		将当前选中的位置设为editingClass
+		 * 		刷新显示
+		 */	
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			// TODO Auto-generated method stub
+			LinearLayout ll 	= (LinearLayout)layoutInflater.inflate(R.layout.mutil_edit_classs_detail_list_item, null);
+			TextView tvClassNum =(TextView)ll.findViewById(R.id.tvMutiEditClassNum);		
+			tvClassNum.setText("第"+position+"节");
+			
+			if(isEditing)//编辑状态下的处理
+			{	//注意，detailPrimaryCacher保存的顺序为周一到周日，但显示时需要显示为周日到周六
+				for(int i=0;i<7;i++)
+				{
+					final ImageView imageView=(ImageView)ll.findViewById(ImageViewIDsForList[i]);
+					final Class classTemp=detailPrimaryCacher[position][i];
+					//遍历7天课程，如果找到当天该节有课，如果该节课与要编辑的课名不同
+					//表示已经被占用，设为灰且不可操作
+					if(classTemp!=null&&editingClass!=null&&!editingClass.getClassName().equals(classTemp.getClassName()))
+					{
+						imageView.setClickable(false);
+						imageView.setImageResource(R.drawable.gridgrey);
+					}//editingClass为空时，则所有不为空的点都设为灰，且不响应按键
+					else if(editingClass==null&&classTemp!=null)
+					{
+						imageView.setClickable(false);
+						imageView.setImageResource(R.drawable.gridgrey);						
+					}
+					else//剩下有3种格:editingClass为空时的空格，和editing不为同时相同的格以及空格
+					{
+						final int WD=i;
+						final int CN=position;
+						//设为可点击
+						imageView.setClickable(true);
+						if(classTemp!=null)//有值的情况
+						{
+							imageView.setImageResource(R.drawable.gridyellow);	
+						}
+						else//无值的情况
+						{
+							imageView.setImageResource(R.drawable.gridwhite);							
+						}					
+						View.OnClickListener ocl=new OnClickListener()
+						{
+							@Override
+							public void onClick(View v) {
+								// TODO Auto-generated method stub
+								Toast.makeText(editClass.this, "选中课程"+WD+CN, Toast.LENGTH_SHORT).show();		    		
+								UserChoic uc=operationRecorder.isContain(WD,CN);
+								if(uc!=null)//之前操作过
+								{	//之前的操作为添加，则此次操作为删掉
+									if(uc.getOperation()==UserChoic.OP_ADD)
+									{
+										imageView.setImageResource(R.drawable.gridwhite);
+										uc.setDelete();
+									}
+									else//之前的操作为删除，则此次为添加 
+									{
+										imageView.setImageResource(R.drawable.gridyellow);
+										uc.setAdd();
+									}
+								}
+								else
+								{	//第一次操作且该位置不为空，表示是删除
+									if(classTemp!=null)
+									{
+										imageView.setImageResource(R.drawable.gridwhite);
+										UserChoic UC=new UserChoic(WD,CN);
+										UC.setDelete();
+										operationRecorder.addOperation(UC);
+									}
+									else//第一次操作且该位置为空，表示增加
+									{
+										imageView.setImageResource(R.drawable.gridyellow);
+										UserChoic UC=new UserChoic(WD,CN);
+										UC.setAdd();
+										operationRecorder.addOperation(UC);										
+									}
+								}
+							}						
+						};
+						imageView.setOnClickListener(ocl);
+					}
 				}
 			}
-		});
-		
-		
-		bGridViewOK.setOnClickListener(new Button.OnClickListener()
-        {
-        	@Override
-        	public void onClick(View v)
-        	{
-        		//表示用户选择确认，在onCreate中不需要再初始化
-    	    	classTableModifyFlag=false;        		
-        		onCreate(null);
-        		setViewContent();
-        	}
-        });
-		bGridViewCancel.setOnClickListener(new Button.OnClickListener()
-        {
-        	@Override
-        	public void onClick(View v)
-        	{
-        		 //用户选择取消，在onCreate中需要再次初始化
-    	    	classTableModifyFlag=true;  
-        		onCreate(null);
-        		setViewContent();
-        	}
-        });
-    }
-    //setClassSelectingGrid
-	void resourceInitialize()
-	{
-	
-	    spWeekDay=(Spinner)findViewById(R.id.spinnerWeekDay);
-	    spClassNum=(Spinner)findViewById(R.id.spinnerClassNum);
-	    bMultiOperate=(Button)findViewById(R.id.buttonEditCancel);
-	    bAdd=(Button)findViewById(R.id.buttonAddClass);
-	    bDelete=(Button)findViewById(R.id.buttonMultiOperate);
-	    bSetClassTime=(Button)findViewById(R.id.buttonSetClassTime);
-	    etClassName=(EditText)findViewById(R.id.editTextClassName);
-	    etClassLocation=(EditText)findViewById(R.id.editTextClassLocation);
-	    etTeacherName=(EditText)findViewById(R.id.editTextTeacherName);
-//	    spContinuumClass = (Spinner)findViewById(R.id.spinnerContinuumClass);
-	    
-	    adapterWD=new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,pWeekDay);
-	    adapterCN=new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,pClassNum);
-	    adapterCC=new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,pContinuumClass);
-	    
-	    adapterWD.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-	    adapterCN.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);	
-	    adapterCC.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);	
-	    
-	    spWeekDay.setAdapter(adapterWD);
-	    spClassNum.setAdapter(adapterCN);
-//	    spContinuumClass.setAdapter(adapterCC);
-	    
-	    //设置两个下拉框的内容
-	    spWeekDay.setOnItemSelectedListener(new Spinner.OnItemSelectedListener()
-	    {
-	    	@Override
-	    	public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3)
-	    	{
-	    		arg0.setVisibility(View.VISIBLE);
-	    		//判断下拉之前选中的课时是否已经标识为已选，如果为已选，则恢复原来状态
-	    		if(classIndicaterTable_New[m_WeekDay-1][m_ClassNum-1]==CLASS_INDICATER_SELECTED)
-	    		{
-	    			classIndicaterTable_New[m_WeekDay-1][m_ClassNum-1]=classIndicaterTable[m_WeekDay-1][m_ClassNum-1];
-	    		}
-	    		m_WeekDay=arg2+1;
-	    		//更新表格的内容
-	    		classIndicaterTable_New[m_WeekDay-1][m_ClassNum-1]=CLASS_INDICATER_SELECTED;
-	    		//根据isUpdateWDSpinner判断是否要更新控制的值
-	    		if(isUpdateWDSpinner==true)
-	    		{
-		    		//选择后将对应的课程信息刷新到edit text控件中
-		    		ClassDB cDB=new ClassDB(editClass.this);
-		    		Class cc=cDB.readClass(currentClassSheetName,m_ClassNum, m_WeekDay);
-		    		if(cc!=null)
-		    		{
-		    			etClassName.setText(cc.getClassName());
-		    			etTeacherName.setText(cc.getTeacherName());
-		//   			etClassLocation.setText(cc.getClassLocation);      			
-		    		}
-		    		else
-		    		{
-		    			etClassName.setText(null);
-		    			etTeacherName.setText(null);
-		    		}
-	    		}
-	    		else isUpdateWDSpinner=true;
-	    	}
-	    	@Override
-	    	public void onNothingSelected(AdapterView<?>arg0)
-	    	{
-	//    		m_WeekDay=pWeekDay[0];
-	    		m_WeekDay=1;
-	    	}
-	    });
-	    
-	    
-	    
-	    spClassNum.setOnItemSelectedListener(new Spinner.OnItemSelectedListener()
-	    {
-	    	@Override
-	    	public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3)
-	    	{
-	    		arg0.setVisibility(View.VISIBLE);
-	    		if(classIndicaterTable_New[m_WeekDay-1][m_ClassNum-1]==CLASS_INDICATER_SELECTED)
-	    		{
-	    			classIndicaterTable_New[m_WeekDay-1][m_ClassNum-1]=classIndicaterTable[m_WeekDay-1][m_ClassNum-1];
-	    		}
-	    		m_ClassNum=arg2+1;
-	    		classIndicaterTable_New[m_WeekDay-1][m_ClassNum-1]=CLASS_INDICATER_SELECTED;
-	    		if(isUpdateCNSpinner==true)
-	    		{
-		    		//选择后将对应的课程信息刷新到edit text控件中
-		    		ClassDB cDB=new ClassDB(editClass.this);
-		    		Class cc=cDB.readClass(currentClassSheetName,m_ClassNum, m_WeekDay);
-		    		if(cc!=null)
-		    		{
-		    			etClassName.setText(cc.getClassName());
-		    			etTeacherName.setText(cc.getTeacherName());
-		    		}
-		    		else
-		    		{
-		    			etClassName.setText(null);
-		    			etTeacherName.setText(null);
-		    		}
-	    		}
-	    		else isUpdateCNSpinner=true;
-	    	}
-	    	@Override
-	    	public void onNothingSelected(AdapterView<?>arg0)
-	    	{
-	    		m_ClassNum=1;
-	    	}
-	    });
-	    /*
-	    //设置连接上课节数下拉菜单
-	    spContinuumClass.setOnItemSelectedListener(new Spinner.OnItemSelectedListener()
-	    {
-	    	@Override
-	    	public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3)
-	    	{
-	    		arg0.setVisibility(View.VISIBLE);
-	    		m_ContinuumClass=arg2;
-	    	}
-	    	@Override
-	    	public void onNothingSelected(AdapterView<?>arg0)
-	    	{
-	    		m_ContinuumClass=0;
-	    	}
-	    });
-	    */
-	    etClassName.setHint("请输入课程名称");
-	    etClassLocation.setHint("请输入上课教室");
-	    etTeacherName.setHint("请输入老师名字");
-		if(m_ClassName!=null)
-		{
-			etClassName.setText(m_ClassName);
-		}
-		if(m_TeacherName!=null)
-		{
-			etTeacherName.setText(m_TeacherName);
-		}
-		if(m_ClassLocation!=null)
-		{
-			etClassLocation.setText(m_ClassLocation);
-		}
-		
-	    //添加按键向应函数
-	    bAdd.setOnClickListener(new Button.OnClickListener()
-	    {
-	    	@Override
-	    	public void onClick(View v)
-	    	{
-	    		//点击添加后，读取指示表中的设置状态，将课程信息写入数据库
-	    		ClassDB cDB=new ClassDB(editClass.this);
-	    		m_ClassName=etClassName.getText().toString();
-	    		m_ClassLocation=etClassLocation.getText().toString();
-	    		m_TeacherName=etTeacherName.getText().toString();
-//	    		Class C=new Class(m_ClassNum,m_WeekDay,m_ClassName,m_TeacherName,m_ContinuumClass,m_ClassTimeHour,m_ClassTimeMinute);
-	    		Class C=new Class();
-	    		//先将主编辑界面的课程信息写入数据库，之后再读取指示表中的内容
-	    		cDB.writeClass(currentClassSheetName,C);
-	    		int WD=0,CN=0;
-	    		for(WD=0;WD<7;WD++)
-	    		{
-	    			for(CN=0;CN<MAX_CLASSES_PER_DAY;CN++)
-	    			{
-	    				if(classIndicaterTable_New[WD][CN]==CLASS_INDICATER_SELECTED)
-	    				{
-	    					C.setWeekDay(WD+1);
-	    					C.setClassNum(CN+1);
-	                		cDB.writeClass(currentClassSheetName,C);
-	                		//更新两个指示表的内容
-	                		classIndicaterTable[WD][CN]=CLASS_INDICATER_OCCUPIED;
-	                		classIndicaterTable_New[WD][CN]=CLASS_INDICATER_OCCUPIED;
-	    				}
-	    			}
-	    		}
-	    	}
-	    });
-	    //添加和删除考虑要放在不同的界面上操作
-	    bDelete.setOnClickListener(new Button.OnClickListener()
-	    {
-	    	@Override
-	    	public void onClick(View v)
-	    	{
-	    		ClassDB cDB=new ClassDB(editClass.this);
-	    		cDB.deleteClass(currentClassSheetName,m_ClassNum, m_WeekDay);
-	    		etClassName.setText(null);
-	    		etTeacherName.setText(null);
-	    		//提供批量删除功能
-	    		int WD=0,CN=0;
-	    		for(WD=0;WD<7;WD++)
-	    		{
-	    			for(CN=0;CN<MAX_CLASSES_PER_DAY;CN++)
-	    			{
-	    				if(classIndicaterTable_New[WD][CN]==CLASS_INDICATER_SELECTED)
-	    				{
-	    					cDB.deleteClass(currentClassSheetName,CN+1,WD+1);
-	                		classIndicaterTable[WD][CN]=CLASS_INDICATER_EMPTY;
-	                		classIndicaterTable_New[WD][CN]=CLASS_INDICATER_EMPTY;
-	    				}
-	    			}
-	    		}
-	    	}
-	    });
-	    //设置批量修改按键
-	    bMultiOperate.setOnClickListener(new Button.OnClickListener()
-	    {
-	    	@Override
-	    	public void onClick(View v)
-	    	{
-	/*
-	    		Intent intent = new Intent();
-	    		intent.setClass(editClass.this,SchoolLifeActivity.class);
-	    		startActivity(intent);
-	    		editClass.this.finish();
-	*/        		
-	    		//切过去之前，先将内容保存下来
-	    		m_ClassName=etClassName.getText().toString();
-	    		m_ClassLocation=etClassLocation.getText().toString();
-	    		m_TeacherName=etTeacherName.getText().toString();
-	    		//将当前下拉框选择中课时设置为已选
-	    		if(classIndicaterTable_New[m_WeekDay-1][m_ClassNum-1]!=CLASS_INDICATER_SELECTED)
-	    		{
-	    			classIndicaterTable_New[m_WeekDay-1][m_ClassNum-1]=CLASS_INDICATER_SELECTED;
-	    		}
-	    		setClassSelectingGrid();
-	    	}
-	    });
-	    //设置时间
-	    bSetClassTime.setOnClickListener(new Button.OnClickListener()
-	    {
-	    	@Override
-	    	public void onClick(View v)
-	    	{
-	    		new TimePickerDialog(editClass.this,
-	    				new TimePickerDialog.OnTimeSetListener()
-	    		{						
-							@Override
-							public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-								// TODO Auto-generated method stub
-								m_ClassTimeHour=hourOfDay;
-								m_ClassTimeMinute=minute;
-							}
-						},8,0,true).show();
-	    	}
-	    });
-	}
-	//resourceInitialize()
-	//用来设置页面控件内容这样在切到setClassSelectingGrid回来后，可以正确显示设置的值
-	void setViewContent()
-	{
-		isUpdateWDSpinner=false;
-		spWeekDay.setSelection(m_WeekDay-1);
-		isUpdateCNSpinner=false;
-		spClassNum.setSelection(m_ClassNum-1);
-//		spContinuumClass.setSelection(m_ContinuumClass);
-		if(m_ClassName!=null)
-		{
-			etClassName.setText(m_ClassName);
-		}
-		if(m_TeacherName!=null)
-		{
-			etTeacherName.setText(m_TeacherName);
-		}
-		if(m_ClassLocation!=null)
-		{
-			etClassLocation.setText(m_ClassLocation);
-		}
-	}
-	//setViewContent()
+			else//非编辑状态下的处理
+			{
+				for(int i=0;i<7;i++)
+				{
+					final ImageView imageView=(ImageView)ll.findViewById(ImageViewIDsForList[i]);
+					final Class classTemp=detailPrimaryCacher[position][i];
+					final int WD=i;
+					final int CN=position;
+					//设为可点击
+					imageView.setClickable(true);
+					if(editingClass==null&&classTemp!=null)
+					{	//选中的格为空时，对所有的非空格设为灰，且不响应按键
+						imageView.setImageResource(R.drawable.gridgrey);
+					}
+					else if(editingClass!=null&&classTemp!=null&&!editingClass.getClassName().equals(classTemp.getClassName()))
+					{	//选中的格为不空，对所有的不同的非空格设为灰，且不响应按键
+						imageView.setImageResource(R.drawable.gridgrey);
+					}
+					else
+					{
+						if(classTemp!=null)//有值的情况
+						{
+							imageView.setImageResource(R.drawable.gridyellow);						
+						}
+						else//无值的情况
+						{
+							imageView.setBackgroundResource(R.drawable.gridwhite);							
+						}
+					}					
+					View.OnClickListener ocl=new OnClickListener()
+					{
+						@Override
+						public void onClick(View v) {
+							// TODO Auto-generated method stub
+							Toast.makeText(editClass.this, "选中课程"+WD+CN, Toast.LENGTH_SHORT).show();		    		
+							editingClass=classTemp;
+							initialEditTexts();
+							notifyDataSetChanged();
+						}						
+					};
+					imageView.setOnClickListener(ocl);
+				}				
+			}
+			return ll;
+		}		
+	}	
 }//main

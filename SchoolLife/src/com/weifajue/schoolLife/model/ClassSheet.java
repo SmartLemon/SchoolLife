@@ -4,6 +4,8 @@
 package com.weifajue.schoolLife.model;
 
 import java.util.Date;
+
+import com.weifajue.schoolLife.Util.timeProcess;
 /**
  * @author SmartGang
  *
@@ -145,4 +147,12 @@ public class ClassSheet {
 		return classSheetID;
 	}
 
+	/** 使用classSheet的生效时间，计算当前日期所属的周数
+	 * @return WN，必须大于0
+	 */
+	public int getCurrentWeekNum()
+	{
+		//weekOffset计算的是两个日期之间的周差，再加1表示周数
+		return timeProcess.weekOffset(dateStart, new Date())+1;
+	}
 }

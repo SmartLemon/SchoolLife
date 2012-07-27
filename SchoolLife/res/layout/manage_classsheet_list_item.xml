@@ -2,7 +2,15 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content" >
-
+
+    <Button
+        android:id="@+id/bDeleteSheet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:text="删除" />
+
     <TextView
         android:id="@+id/tvSheetName"
         android:layout_width="wrap_content"
@@ -11,12 +19,11 @@
         android:layout_centerVertical="true"
         android:text="TextView" />
 
-    <Button
-        android:id="@+id/bDeleteSheet"
+    <CheckBox
+        android:id="@+id/cbIsCurrentClassSheet"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:text="删除" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"/>
 
 </RelativeLayout>

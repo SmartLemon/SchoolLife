@@ -1,4 +1,4 @@
- <RelativeLayout android:id="@+id/listClass"
+ <RelativeLayout 
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" 
         xmlns:android="http://schemas.android.com/apk/res/android" 
@@ -11,20 +11,20 @@
      <LinearLayout
          android:id="@+id/mainListViewItemLeft"
          android:layout_width="wrap_content"
-         android:layout_height="match_parent"
+         android:layout_height="wrap_content"
          android:layout_gravity="center"
          android:orientation="vertical" >
 
          <TextView
              android:id="@+id/textViewClassTime"
-             android:layout_width="fill_parent"
+             android:layout_width="wrap_content"
              android:layout_height="wrap_content"
              android:layout_gravity="fill_horizontal|center"
              android:text="TextView" />
 
          <TextView
              android:id="@+id/textViewClassNum"
-             android:layout_width="fill_parent"
+             android:layout_width="wrap_content"
              android:layout_height="wrap_content"
              android:layout_gravity="center_horizontal"
              android:text="TextView" />
@@ -34,7 +34,7 @@
         <LinearLayout
             android:id="@+id/mainListViewItemRight"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
             android:orientation="vertical" >
@@ -42,14 +42,18 @@
             <TextView android:id="@+id/textViewTeacherName" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="TextView"/>
             <TextView android:id="@+id/textViewClassLocation" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="TextView"/>
         </LinearLayout>
-
+
         <TextView
             android:id="@+id/textViewClassName"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
+            android:layout_toLeftOf="@id/mainListViewItemRight"
+            android:layout_toRightOf="@id/mainListViewItemLeft"
+            android:focusable="false"
+            android:gravity="center"
             android:text="TextView"
-            android:focusable="false" android:layout_toLeftOf="@id/mainListViewItemRight" android:layout_toRightOf="@id/mainListViewItemLeft" android:textSize="25sp" android:gravity="center"/>
+            android:textSize="25sp" />
 
     </RelativeLayout>

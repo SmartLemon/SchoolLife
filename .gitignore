@@ -1,0 +1,18 @@
+*.class
+*.DS_Store
+*.settings
+SchoolLife/bin/
+SchoolLife/gen/
+SchoolLife/local.properties
+
+# SchoolLifeService
+*.jar
+*.war
+
+SchoolLifeService/test-classes
+SchoolLifeService/gwt-unitCache/
+
+# this dir not see yet
+SchoolLifeService/war/schoollifeservice/
+SchoolLifeService/war/WEB-INF/deploy/
+SchoolLifeService/war/WEB-INF/classes/

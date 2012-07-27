@@ -8,7 +8,6 @@ import java.util.Date;
 import com.weifajue.schoolLife.model.Class;
 import com.weifajue.schoolLife.model.ClassSheet;
 import com.weifajue.schoolLife.Util.timeProcess;
-import com.weifajue.schoolLife.data.LocalFile;
 import android.database.sqlite.SQLiteDatabase;
 //import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -20,6 +19,7 @@ import android.util.Log;
  * @author SmartGang
  *
  */
+
 public class ClassDB extends SQLiteOpenHelper {
 
 	private final static String DEBUG_TAG="ClassDB";
@@ -38,19 +38,20 @@ public class ClassDB extends SQLiteOpenHelper {
 			"CREATE TABLE [";
 	private final static String CREATE_CLASS_DETAIL_TABLE_TAIL =
 			"] ("
-			  +"[ID] INTEGER PRIMARY KEY,"	//0
-			  +"[WeekNum] INT,"				//1
-			  +"[DayNum] INT," 				//2
-			  +"[ClassNum] INT," 			//3
-			  +"[MinutesForClass] INT," 	//4
-			  +"[ClassName] CHAR," 			//5
-			  +"[TeacherName] CHAR," 		//6
-			  +"[ClassRoom] CHAR," 			//7
-			  +"[isSingIn] BOOLEAN," 		//8
-			  +"[HomeWorkIndex] INT," 		//9
-			  +"[NotesIndex] INT," 			//10
-			  +"[Rating] INT," 				//11
-			  +"[Comment] CHAR)"; 			//12
+		  +"[ID] INTEGER PRIMARY KEY,"	//0
+		  +"[WeekNum] INT,"				//1，本学期第几周
+		  +"[DayNum] INT," 				//2，本学期第几天
+		  +"[ClassNum] INT," 			//3，本日第几节
+		  +"[MinutesForClass] INT," 	//4，本节课开始时间，以6点为起点
+		  +"[ClassName] CHAR," 			//5，课名
+		  +"[TeacherName] CHAR," 		//6，老师名
+		  +"[ClassRoom] CHAR," 			//7，教室
+		  +"[isSingIn] BOOLEAN," 		//8，是否已签到，扩展签到功能
+		  +"[HomeWorkIndex] INT," 		//9，对应作业的ID，0表示没有作业，用来在Homework表中查找使用
+		  +"[NotesIndex] INT," 			//10，对应笔记的ID，查找使用
+		  +"[Rating] INT," 				//11，本节课评分
+		  +"[Comment] CHAR)"; 			//12，本节课的评论
+
 	private final static String CREATE_CLASS_SHEET_TABLE_HEAD =
 			"CREATE TABLE ";
 	private final static String CREATE_CLASS_SHEET_TABLE_TAIL =	
@@ -147,29 +148,8 @@ public class ClassDB extends SQLiteOpenHelper {
 		{	//在ClassSheet列表中新建一个列表
 			ClassSheet cs=new ClassSheet("default");
 			writeClassSheet(db,cs);
-			//新插入一个后，再查一次，以获取新插入的ClassSheet的ID值
-//			cursor1=db.query(CLASS_SHEET_NAME, null, "SheetName"+"=?", string, null, null, null);
-//			cursor1=db.query(CLASS_SHEET_NAME, null, null, null, null, null, null);
 		}
-/* 		cursor1.moveToFirst();
-		int sheetIDColumnIndex=cursor1.getColumnIndex("SheetID");
-		//查到该课表在table里面ID值后，转换为String类型，用于生成其他table的名字
-		currentClassSheetID=cursor1.getInt(sheetIDColumnIndex);
-		cursor1.close();
-//		currentClassSheetID=0;
-		//创建ClassDetailTable
-		currentClassDetailTableName="CDT"+String.valueOf(currentClassSheetID);
-		Log.d(DEBUG_TAG, "Creating ClassDetailTable "+currentClassDetailTableName);
-		db.execSQL(CREATE_CLASS_DETAIL_TABLE_HEAD+currentClassDetailTableName+CREATE_CLASS_DETAIL_TABLE_TAIL);
-		//创建HomeworkTable
-		currentHomeworkTableName="HWT"+String.valueOf(currentClassSheetID);
-		Log.d(DEBUG_TAG, "Creating ClassDetailTable "+currentHomeworkTableName);
-		db.execSQL(CREATE_HOMEWORK_TABLE_HEAD+currentHomeworkTableName+CREATE_HOMEWORK_TABLE_TAIL);	
-		//创建NotesTable
-		currentNotesTableName="NT"+String.valueOf(currentClassSheetID);
-		Log.d(DEBUG_TAG, "Creating ClassDetailTable "+currentNotesTableName);
-		db.execSQL(CREATE_NOTES_TABLE_HEAD+currentNotesTableName+CREATE_NOTES_TABLE_TAIL);	
-*/	}                  
+	}                  
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -184,10 +164,9 @@ public class ClassDB extends SQLiteOpenHelper {
 	{
 		SQLiteDatabase pClassDB=null;
 		Cursor cursor=null;
-		timeProcess tp=new timeProcess();
 		Class C= null;//此处暂未做保护，需要上层调用函数进行判断该返回值是否为空;
 //		int cid=CN*7+WD;
-		int daynum=tp.weekAndWeekDayToDayNum(WN, WD);
+		int daynum=timeProcess.weekAndWeekDayToDayNum(WN, WD);
 		String sel="DayNum=? and ClassNum=?";
 		String[] selArgs=new String[2];
 		selArgs[0]=String.valueOf(daynum);
@@ -234,10 +213,9 @@ public class ClassDB extends SQLiteOpenHelper {
 	{
 		SQLiteDatabase pClassDB=null;
 		Cursor cursor=null;
-		timeProcess tp=new timeProcess();
 		Class C= null;//此处暂未做保护，需要上层调用函数进行判断该返回值是否为空;
-		int WN=tp.dateToDefaultWeekNum(new Date());
-		int daynum=tp.weekAndWeekDayToDayNum(WN, WD);
+		int WN=timeProcess.dateToDefaultWeekNum(new Date());
+		int daynum=timeProcess.weekAndWeekDayToDayNum(WN, WD);
 		String sel="DayNum=? and ClassNum=?";
 		String[] selArgs=new String[2];
 		selArgs[0]=String.valueOf(daynum);
@@ -280,6 +258,14 @@ public class ClassDB extends SQLiteOpenHelper {
 		return C;
 	}
 	
+	//
+	
+	/**
+	 * @param currentClassSheetName
+	 * @param WN
+	 * @param WD
+	 * @return 读取到的列表句柄
+	 */
 	public Class[] readClassDayList(String currentClassSheetName,int WN,int WD)
 	{
 		SQLiteDatabase pClassDB=null;
@@ -287,13 +273,13 @@ public class ClassDB extends SQLiteOpenHelper {
 		Class[] classList=null;
 		String sel="DayNum=?";
 		String[] selArgs=new String[1];
-		timeProcess tp=new timeProcess();
-		int DN=tp.weekAndWeekDayToDayNum(WN, WD);
+		int DN=timeProcess.weekAndWeekDayToDayNum(WN, WD);
 		selArgs[0]=String.valueOf(DN);
 		Log.d(DEBUG_TAG, "reading Class Day List"+selArgs[0]);
 		try
 		{
 			pClassDB=this.getReadableDatabase();
+			pClassDB.beginTransaction();
 			String[] selArgsShhetName=new String[1];
 			selArgsShhetName[0]=currentClassSheetName;
 			cursor=pClassDB.query(CLASS_SHEET_NAME, null,"SheetName=?", selArgsShhetName, null, null, null);
@@ -301,24 +287,101 @@ public class ClassDB extends SQLiteOpenHelper {
 			int sheetIDColumnIndex=cursor.getColumnIndex("SheetID");
 			int classSheetID=cursor.getInt(sheetIDColumnIndex);
 			String tableName="CDT"+String.valueOf(classSheetID);
+			int maxClassNumPerDay=cursor.getInt(5);//读每天最多节数
 			cursor=pClassDB.query(tableName, null, sel, selArgs, null, null, "ClassNum");
+//			cursor=pClassDB.query(tableName, null, null, null, null, null, "ClassNum");
+			cursor.moveToFirst();
 			int count=cursor.getCount();
-			if(count>=0)
+			classList=new Class[maxClassNumPerDay];
+			if(count>0)
 			{
-				cursor.moveToFirst();
-				classList=new Class[count];
+				
 				Log.e(DEBUG_TAG,"reading class success:"+selArgs[0]);
-				for(int i=0;i<count;i++)
+				for(int i=0;i<maxClassNumPerDay;i++)
 				{
-					classList[i]=new Class(WN,WD,cursor.getInt(3),cursor.getString(5),cursor.getString(6));
-					classList[i].setMinutesForClass(cursor.getInt(4));
-					classList[i].setClassRoom(cursor.getString(7));
-					if(cursor.getInt(8)==1)classList[i].setSingin(true);
-					else classList[i].setSingin(false);
-					classList[i].setHomeworkIndex(cursor.getInt(9));
-					classList[i].setNotesIndex(cursor.getInt(10));
-					classList[i].setRate(cursor.getInt(11));
-					classList[i].setComment(cursor.getString(12));
+					int classNum=cursor.getInt(3);
+					if(i==classNum)
+					{
+						classList[i]=new Class(WN,WD,classNum,cursor.getString(5),cursor.getString(6));
+						classList[i].setMinutesForClass(cursor.getInt(4));
+						classList[i].setClassRoom(cursor.getString(7));
+						if(cursor.getInt(8)==1)classList[i].setSingin(true);
+						else classList[i].setSingin(false);
+						classList[i].setHomeworkIndex(cursor.getInt(9));
+						classList[i].setNotesIndex(cursor.getInt(10));
+						classList[i].setRate(cursor.getInt(11));
+						classList[i].setComment(cursor.getString(12));
+						if(cursor.moveToNext()==false)break;
+					}
+				}
+				pClassDB.setTransactionSuccessful();
+				pClassDB.endTransaction(); 
+			}
+		}catch(Exception e)
+		{
+			Log.e(DEBUG_TAG,"Creating database Error while reading");
+		}
+		finally
+		{
+			if(cursor!=null)cursor.close();
+			pClassDB.close();
+		}
+		return classList;
+	}
+	//
+	
+	/**
+	 * 根据给定的表名和节数，读出该节在模板中一周7天的内容(相当于横向读出）
+	 * @param sheetName 
+	 * @param CN
+	 * @param WN
+	 * @return 读出列表的句柄
+	 */
+	public Class[] readClassByNumList(String sheetName,int WN,int CN)
+	{
+		SQLiteDatabase pClassDB=null;
+		Cursor cursor=null;
+		Class[] classList=null;
+		String sel="WeekNum=? and ClassNum=?";
+		String[] selArgs=new String[2];
+		selArgs[0]=String.valueOf(WN);
+		selArgs[1]=String.valueOf(CN);
+		Log.d(DEBUG_TAG, "reading Class Num List"+selArgs[1]);
+		try
+		{
+			pClassDB=this.getReadableDatabase();
+			//以下代码读取课表ID，并生成detail表名
+			String[] selArgsSheetName=new String[1];
+			selArgsSheetName[0]=sheetName;
+			cursor=pClassDB.query(CLASS_SHEET_NAME, null,"SheetName=?", selArgsSheetName, null, null, null);
+			cursor.moveToFirst();
+			int sheetIDColumnIndex=cursor.getColumnIndex("SheetID");
+			int classSheetID=cursor.getInt(sheetIDColumnIndex);
+			String tableName="CDT"+String.valueOf(classSheetID);//生成detail表名
+			cursor=pClassDB.query(tableName, null, sel, selArgs, null, null, "DayNum");
+			cursor.moveToFirst();
+			int count=cursor.getCount();
+			classList=new Class[7];
+			if(count>0)
+			{
+				Log.e(DEBUG_TAG,"reading class success:"+selArgs[0]);
+				for(int i=0;i<7&&cursor!=null;i++)
+				{	//对classList进行填充，如果该天没有课，则空过
+					int DN=cursor.getInt(2);
+					int WD=timeProcess.weekAndDayNumToWeekDay(WN, DN);
+					if(WD==i)
+					{
+						classList[i]=new Class(WN,WD,cursor.getInt(3),cursor.getString(5),cursor.getString(6));
+						classList[i].setMinutesForClass(cursor.getInt(4));
+						classList[i].setClassRoom(cursor.getString(7));
+						if(cursor.getInt(8)==1)classList[i].setSingin(true);
+						else classList[i].setSingin(false);
+						classList[i].setHomeworkIndex(cursor.getInt(9));
+						classList[i].setNotesIndex(cursor.getInt(10));
+						classList[i].setRate(cursor.getInt(11));
+						classList[i].setComment(cursor.getString(12));
+						if(cursor.moveToNext()==false)break;
+					}
 				}
 			}
 		}catch(Exception e)
@@ -337,8 +400,7 @@ public class ClassDB extends SQLiteOpenHelper {
 	{
 		SQLiteDatabase pClassDB=this.getWritableDatabase();
 		Cursor cursor = null;
-		timeProcess tp=new timeProcess();
-		int daynum=tp.weekAndWeekDayToDayNum(C.getWeekNum(), C.getWeekDay());
+		int daynum=timeProcess.weekAndWeekDayToDayNum(C.getWeekNum(), C.getWeekDay());
 		//使用contentValues的方法来插入和更新数据库
 		ContentValues cv=new ContentValues();
 		cv.put("WeekNum", C.getWeekNum());
@@ -354,10 +416,10 @@ public class ClassDB extends SQLiteOpenHelper {
 		cv.put("NotesIndex",C.getNotesIndex());
 		cv.put("Rating", C.getRate());
 		cv.put("Comment", C.getComment());
-		
 		Log.d(DEBUG_TAG, "writing Class"+C.getClassName());
 		try
 		{
+			//通地danyNum和ClassNum来唯一定位一节课
 			String sel="DayNum=? and ClassNum=?";
 			String[] selArgs=new String[2];
 			selArgs[0]=String.valueOf(daynum);
@@ -369,7 +431,7 @@ public class ClassDB extends SQLiteOpenHelper {
 			int sheetIDColumnIndex=cursor.getColumnIndex("SheetID");
 			int classSheetID=cursor.getInt(sheetIDColumnIndex);
 			String tableName="CDT"+String.valueOf(classSheetID);			
-			cursor=pClassDB.query(currentClassSheetName, null, sel, selArgs, null, null, "ID");
+			cursor=pClassDB.query(tableName, null, sel, selArgs, null, null, "ID");
 			//判断是更新还是新插入
 			if(cursor.getCount()!=0)
 			{
@@ -392,18 +454,95 @@ public class ClassDB extends SQLiteOpenHelper {
 		}
 		return true;
 	}
-/*
-	//更新指定课程的内容，返回true表示成功,返回false表示失败
-	public boolean updateClass(Class C)
+
+	//
+	
+	/**根据给定的表名、周和节数，横向写入一周的课表内容
+	 * @param sheetName
+	 * @param WN
+	 * @param CN
+	 * 首先获取到该detail表的表名
+	 * 遍历classList，判断是否为空，如不为空则执行插入操作
+	 * 使用如下方法来提高批量插入的效率：
+	 * dataBase.beginTransaction();        //手动设置开始事务
+	 * --------数据插入操作循环--------
+	 * dataBase.setTransactionSuccessful();        //设置事务处理成功，不设置会自动回滚不提交
+	 * dataBase.endTransaction();        //处理完
+	 */
+	public void writeClassByNumList(String sheetName,int WN, int CN, Class[] classList)
 	{
-		return true;
+		SQLiteDatabase pClassDB=null;
+		Cursor cursor=null;
+
+		Log.d(DEBUG_TAG, "writing Class Num List"+WN+" "+CN);
+		try
+		{
+			pClassDB=this.getReadableDatabase();
+			//以下代码读取课表ID，并生成detail表名
+			String[] selArgsSheetName=new String[1];
+			selArgsSheetName[0]=sheetName;
+			cursor=pClassDB.query(CLASS_SHEET_NAME, null,"SheetName=?", selArgsSheetName, null, null, null);
+			cursor.moveToFirst();
+			int sheetIDColumnIndex=cursor.getColumnIndex("SheetID");
+			int classSheetID=cursor.getInt(sheetIDColumnIndex);
+			String tableName="CDT"+String.valueOf(classSheetID);//生成detail表名
+			//通过dayNum和ClassNum来唯一定位一节课，dayNum在for循环中赋值
+			String[] selArgs=new String[2];	
+			selArgs[0]=String.valueOf(WN);
+			selArgs[1]=String.valueOf(CN);
+			pClassDB.beginTransaction();
+			//先册除，再添加
+			pClassDB.delete(tableName, "WeekNum=? and ClassNum=?", selArgs);
+			for(int i=0;i<7;i++)
+			{
+				if(classList[i]!=null)
+				{	
+					//生成dayNum
+					int daynum=timeProcess.weekAndWeekDayToDayNum(WN, i);
+					selArgs[0]=String.valueOf(daynum);//设计检索条件的dayNum
+					ContentValues cv=new ContentValues();
+					cv.put("WeekNum", WN);
+					cv.put("DayNum", daynum);
+					cv.put("ClassNum", CN);
+					cv.put("MinutesForClass", classList[i].getMinutesForClass());
+					cv.put("ClassName", classList[i].getClassName());
+					cv.put("TeacherName", classList[i].getTeacherName());
+					cv.put("ClassRoom", classList[i].getClassRoom());
+					if(classList[i].isSingin()==true)cv.put("isSingIn", 1);
+					else cv.put("isSingIn", 0);
+					cv.put("HomeWorkIndex",classList[i].getHomeworkIndex());
+					cv.put("NotesIndex",classList[i].getNotesIndex());
+					cv.put("Rating", classList[i].getRate());
+					cv.put("Comment", classList[i].getComment());
+					Log.d(DEBUG_TAG, "writing Class"+classList[i].getClassName());
+					//前面已经删除掉，所以这里不用再做添加或者更新的判断
+					Log.d(DEBUG_TAG, "insert Class in writing process");
+					pClassDB.insert(tableName, null, cv);
+				}
+			}
+			pClassDB.setTransactionSuccessful(); 	
+			pClassDB.endTransaction();
+		}catch(Exception e)
+		{
+			Log.e(DEBUG_TAG,"Creating database Error while reading");
+		}
+		finally
+		{
+			if(cursor!=null)cursor.close();
+			pClassDB.close();
+		}		
 	}
-*/
+	
+	//
+	public void writeCassByNumListIntoTemplate(String sheetName,int CN, Class[] classList)
+	{
+		writeClassByNumList(sheetName,0,CN,classList);
+	}
+	
 	//删除指定的课程，返回true表示成功,返回false表示失败
 	public boolean deleteClass(String currentClassSheetName,int WN,int WD,int CN)
 	{		
-		timeProcess tp=new timeProcess();
-		int daynum=tp.weekAndWeekDayToDayNum(WN,WD);
+		int daynum=timeProcess.weekAndWeekDayToDayNum(WN,WD);
 		SQLiteDatabase pClassDB=this.getWritableDatabase();
 		Log.d(DEBUG_TAG, "delete Class"+String.valueOf(WN)+" "+String.valueOf(WD)+" "+String.valueOf(CN));
 		try
@@ -436,9 +575,8 @@ public class ClassDB extends SQLiteOpenHelper {
 	//删除指定的课程，返回true表示成功,返回false表示失败
 	public boolean deleteClass(String currentClassSheetName,int WD,int CN)
 	{	
-		timeProcess tp=new timeProcess();
-		int WN=tp.dateToDefaultWeekNum(new Date());
-		int daynum=tp.weekAndWeekDayToDayNum(WN,WD);
+		int WN=timeProcess.dateToDefaultWeekNum(new Date());
+		int daynum=timeProcess.weekAndWeekDayToDayNum(WN,WD);
 		SQLiteDatabase pClassDB=this.getWritableDatabase();
 		Log.d(DEBUG_TAG, "delete Class"+String.valueOf(WN)+" "+String.valueOf(WD)+" "+String.valueOf(CN));
 		try
@@ -467,15 +605,46 @@ public class ClassDB extends SQLiteOpenHelper {
 			pClassDB.close();
 		}
 		return true;
-	}
-/*
-	public Cursor getClassCursor()
+	}	
+	
+	/**
+	 * 在class列表中，以第0周为模板，后面的的课程内容均从模板中读取，编辑课表时直接编码模板的内容
+	 * @param CS:要操作的课表名称
+	 * @param cc:要操作的课程，直接将weeknum置为0表示是模板
+	 */
+	public void writeClassTemplate(String CS, Class cc)
 	{
-		SQLiteDatabase db=this.getReadableDatabase();
-		Cursor cursor=db.query(TABLE_NAME, null, null, null, null, null, CLASSID);
-		return cursor;
+		cc.setWeekNum(0);
+		writeClass(CS,cc);
 	}
-*/
+	/**
+	 * 按天读取模板的内容
+	 * @param CS
+	 * @param WD
+	 * @return 返回Class列表句柄
+	 */
+	public Class[] readClassTemplateByDay(String CS, int WD)
+	{
+		return readClassDayList(CS, 0, WD);
+	}
+	
+	/**
+	 * 按节号读出模板中一节在一周的内容
+	 * @param sheetName
+	 * @param CN
+	 * @return 模板列表句柄
+	 */
+	public Class[] readClassTemplateByNumList(String sheetName, int CN)
+	{
+		return readClassByNumList(sheetName,0,CN);
+	}
+	
+	public Class readClassTemplate(int WD, int CN)
+	{
+		return null;
+	}
+	
+
 	public void writeClassSheet(SQLiteDatabase db,ClassSheet cs)
 	{
 //		SQLiteDatabase db2=this.getWritableDatabase();
@@ -638,6 +807,7 @@ public class ClassDB extends SQLiteOpenHelper {
 		}
 		return true;
 	}
+	
 	public ClassSheet readClassSheet(String classSheetName)
 	{
 		SQLiteDatabase db;
@@ -688,21 +858,7 @@ public class ClassDB extends SQLiteOpenHelper {
 		return cs;
 	}
 	
-	//读取当前课表
-//	public ClassSheet getCurrentClassSheet()
-//	{
-//		return readClassSheet(currentClassSheetName);
-//	}
-/*
-	public void setTableName()
-	{
-		ClassSheet cs=readClassSheet(currentClassSheetName);
-		currentClassSheetID=cs.getClassSheetID();
-		currentClassDetailTableName="CDT"+String.valueOf(currentClassSheetID);
-		currentHomeworkTableName="HWT"+String.valueOf(currentClassSheetID);
-		currentNotesTableName="NT"+String.valueOf(currentClassSheetID);
-	}
-*/	//读取课表名称列表
+	//读取课表名称列表
 	public String[] readClassSheetList()
 	{
 		Cursor cursor=null;

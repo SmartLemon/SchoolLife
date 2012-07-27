@@ -120,9 +120,7 @@ public class editClassSheet extends Activity{
 		    		classSheet.setMinuteForPerClass(Integer.valueOf(etClassMinuters.getText().toString()));
 		    		
 					Toast.makeText(editClassSheet.this, "设置上课时间", Toast.LENGTH_SHORT).show();		    		
-					
-					
-					
+										
 					RelativeLayout setClasstimeLL=new RelativeLayout(editClassSheet.this);
 					ListView setClassTimeLV=new ListView(editClassSheet.this);
 					SetTimeAdapter timeAdapter=new SetTimeAdapter(editClassSheet.this);

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/relativeLayout1"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <Button
+        android:id="@+id/like"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:gravity="center_horizontal"
+        android:background="@drawable/btn_left_selector"/>
+
+
+
+    <Button
+        android:id="@+id/hate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_centerVertical="true"
+        android:background="@drawable/btn_right_selector"
+        android:gravity="center_horizontal" />
+
+     <TextView
+         android:id="@+id/shareing"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_centerVertical="true"
+         android:layout_toLeftOf="@+id/top_btn_right"
+         android:layout_toRightOf="@+id/top_btn_left"
+         android:ellipsize="middle"
+         android:gravity="center_horizontal"
+         android:text="第12周课表"
+         android:textColor="@color/title_tv_color"
+         android:textSize="25.0sp" />
+    
+</RelativeLayout>

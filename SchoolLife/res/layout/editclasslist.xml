@@ -5,7 +5,7 @@
         android:layout_height="fill_parent"
         android:orientation="vertical" 
         android:background="@color/gray_background" 
->
+android:scrollbars="vertical" android:isScrollContainer="true">
 
         <RelativeLayout
             android:id="@+id/relativelayout2"
@@ -13,155 +13,99 @@
             android:layout_height="wrap_content"
             android:paddingTop="45dip"
             android:orientation="vertical"
-            android:paddingLeft="10dip" 
-	        android:paddingRight="10dip" 
+
 	        android:paddingBottom="5dip" >
 
             <LinearLayout
-                android:id="@+id/linearLayout4"
+                android:id="@+id/linearLayout5"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_marginRight="2dip"
+                android:layout_weight="1"
+                android:background="@drawable/editclass_item_bkg"
+                android:gravity="center" >
 
-                <LinearLayout
-                    android:id="@+id/linearLayout5"
+                <TextView
+                    android:id="@+id/textView1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginRight="2dip"
-                    android:layout_weight="1" 
-                    android:gravity="center" 
-                    android:background="@drawable/editclass_item_bkg">
-
-                    <TextView
-                        android:id="@+id/textView1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:text="@string/weekday"
-                        android:textSize="25dip" />
-
-                    <Spinner
-                        android:id="@+id/spinnerWeekDay"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/button_bkg_normal" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/linearLayout6"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                	android:layout_marginLeft="2dip"                    
-                    android:gravity="center" 
-                    android:background="@drawable/editclass_item_bkg">
-
-                    <TextView
-                        android:id="@+id/textView2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="第"
-                        android:textSize="25dip" />
-
-                    <Spinner
-                        android:id="@+id/spinnerClassNum"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" 
-                        android:background="@drawable/button_bkg_normal"/>
-
-                    <TextView
-                        android:id="@+id/textView3"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="节"
-                        android:textSize="25dip" />
-
-                </LinearLayout>
-
+                    android:gravity="center"
+                    android:text="上课时间"
+                    android:textSize="25dip" />
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/linearLayout7"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center" 
-                android:background="@drawable/editclass_item_bkg" 
-                android:paddingLeft="10dip" 
-                android:paddingRight="20dip" 
-                android:paddingBottom="5dip" 
-                android:paddingTop="5dip" 
-                android:layout_below="@id/linearLayout4" 
-                android:layout_marginTop="4dip">
+                android:layout_below="@+id/linearLayout5"
+                android:background="@drawable/editclass_item_bkg"
+                android:gravity="center|left"
+                android:orientation="vertical"
+                android:paddingBottom="5dip"
+                android:paddingLeft="10dip"
+                android:paddingRight="20dip"
+                android:paddingTop="5dip" >
 
-                <TextView
-                    android:id="@+id/textView4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="课程名程：" 
-                    android:textSize="20dip"/>
+                <LinearLayout
+                    android:id="@+id/linearLayout2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
 
-                <EditText
-                    android:id="@+id/editTextClassName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" 
-                    android:layout_weight="1">
+                    <TextView
+                        android:id="@+id/tvShowDetailClassName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="课程名称" />
 
-                    <requestFocus />
-                </EditText>
+                    <EditText
+                        android:id="@+id/etShowDetailClassName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" >
 
-            </LinearLayout>
+                        <requestFocus />
+                    </EditText>
 
-            <LinearLayout
-                android:id="@+id/linearLayout8"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" 
-                android:gravity="center"
-                android:background="@drawable/editclass_item_bkg" 
-                android:paddingLeft="10dip" 
-                android:paddingRight="20dip" 
-                android:paddingBottom="5dip" 
-                android:paddingTop="5dip" 
-                android:layout_below="@id/linearLayout7" 
-                android:layout_marginTop="4dip">
+                </LinearLayout>
 
-                <TextView
-                    android:id="@+id/textView5"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="上课地点：" android:textSize="20dip"/>
+                <LinearLayout
+                    android:id="@+id/linearLayout3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
 
-                <EditText
-                    android:id="@+id/editTextClassLocation"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1" />
+                    <TextView
+                        android:id="@+id/tvShowDetailTeacherName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="教		师" />
 
-            </LinearLayout>
+                    <EditText
+                        android:id="@+id/etShowDetailTeacherName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
 
-            <LinearLayout
-                android:id="@+id/linearLayout9"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:background="@drawable/editclass_item_bkg" 
-                android:paddingLeft="10dip" 
-                android:paddingRight="20dip" 
-                android:paddingBottom="5dip" 
-                android:paddingTop="5dip" 
-                android:layout_below="@id/linearLayout8" 
-                android:layout_marginTop="4dip">
+                </LinearLayout>
 
-                <TextView
-                    android:id="@+id/textView6"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="任课老师：" android:textSize="20dip"/>
+                <LinearLayout
+                    android:id="@+id/linearLayout4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
 
-                <EditText
-                    android:id="@+id/editTextTeacherName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1" />
+                    <TextView
+                        android:id="@+id/tvShowDetailClassRoom"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="地		点" />
+
+                    <EditText
+                        android:id="@+id/etShowDetailClassRoom"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
@@ -169,29 +113,19 @@
                 android:id="@+id/linearLayout10"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_below="@+id/linearLayout7"
+                android:layout_marginBottom="10dip"
                 android:background="@drawable/editclass_item_bkg"
                 android:gravity="center"
                 android:paddingBottom="5dip"
-                android:paddingLeft="10dip"
-                android:paddingRight="20dip"
-                android:paddingTop="5dip" 
-                android:layout_below="@id/linearLayout9" 
-                android:layout_marginTop="4dip" 
-                android:layout_marginBottom="10dip">
+                android:paddingTop="5dip" >
 
-                <Button
-                    android:id="@+id/buttonSetClassTime"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="设置时间" 
-                    android:background="@drawable/button_bkg_normal"/>
+                <ListView
+                    android:id="@+id/lvMutiEditClassDetial"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:clickable="false">
 
-                <Button
-                    android:id="@+id/buttonEditCancel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="多搞几个" 
-                    android:background="@drawable/button_bkg_normal"/>
+                </ListView>
 
             </LinearLayout>
 
